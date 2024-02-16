@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "systema"
+version = "0.1.0"
+description = ""
+authors = ["Rodrigo Eiti Kimura <rodrigoeitikimura@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = {extras = ["all"], version = "^0.109.2"}
+typer = {extras = ["all"], version = "^0.9.0"}
+sqlmodel = {extras = ["all"], version = "^0.0.14"}
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+commitizen = "^3.14.1"
+ruff = "^0.2.1"
+pre-commit = "^3.6.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.commitizen]
+version_files = [
+    "mono/__mono/__version__.py",
+    "pyproject.toml:version",
+]
