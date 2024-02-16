@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "systema"
-version = "0.1.0"
+version = "0.2.0"
 description = ""
 authors = ["Rodrigo Eiti Kimura <rodrigoeitikimura@gmail.com>"]
 readme = "README.md"
@@ -23,7 +23,7 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.commitizen]
+version = "0.2.0"
 version_files = [
-    "mono/__mono/__version__.py",
     "pyproject.toml:version",
 ]
