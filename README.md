@@ -19,7 +19,7 @@ This project is intended to be my "Productivity System".
 - TUI client
   - Textual
 
-# Planned features
+## Planned features
 
 - Project Manager
 - Diagrams
