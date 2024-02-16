@@ -23,6 +23,9 @@ behave = "^1.2.6"
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
+[tool.poetry.scripts]
+cli = "systema.cli:app"
+
 [tool.ruff]
 line-length = 88
 indent-width = 4
