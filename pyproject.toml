@@ -17,6 +17,7 @@ pytest = "^8.0.0"
 commitizen = "^3.14.1"
 ruff = "^0.2.1"
 pre-commit = "^3.6.1"
+behave = "^1.2.6"
 
 [build-system]
 requires = ["poetry-core"]
@@ -37,3 +38,8 @@ version_files = [
     "systema/__version__.py",
     "pyproject.toml:version",
 ]
+
+[tool.pyright]
+include = ["."]
+exclude = []
+ignore = ["./features/steps/*.py"]
