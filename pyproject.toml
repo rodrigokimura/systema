@@ -22,8 +22,18 @@ pre-commit = "^3.6.1"
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
+[tool.ruff]
+line-length = 88
+indent-width = 4
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "W", "C901"]
+extend-select = ["I"]
+ignore = []
+
 [tool.commitizen]
 version = "0.2.1"
 version_files = [
+    "systema/__version__.py",
     "pyproject.toml:version",
 ]
