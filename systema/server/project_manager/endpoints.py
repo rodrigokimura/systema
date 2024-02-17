@@ -1,24 +1,26 @@
+from http import HTTPStatus
 from uuid import UUID
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from sqlmodel import Session, select
 
 from ..db import engine
-from .models import Project
+from .models import Project, ProjectCreate, ProjectUpdate
 
 router = APIRouter()
 
 
-@router.post("/projects")
-async def create_project(project: Project):
+@router.post("/projects", response_model=Project, status_code=HTTPStatus.CREATED)
+async def create_project(project: ProjectCreate):
     with Session(engine) as session:
-        session.add(project)
+        project_db = Project.model_validate(project)
+        session.add(project_db)
         session.commit()
-        session.refresh(project)
-        return project
+        session.refresh(project_db)
+        return project_db
 
 
-@router.get("/projects")
+@router.get("/projects", response_model=list[Project])
 async def list_projects():
     with Session(engine) as session:
         statement = select(Project)
@@ -26,23 +28,29 @@ async def list_projects():
         return projects
 
 
-@router.get("/projects/{id}")
+@router.get("/projects/{id}", response_model=Project)
 async def get_project(id: UUID):
     with Session(engine) as session:
-        statement = select(Project).where(Project.id == id)
-        project = session.exec(statement).one()
-        return project
+        db_project = session.get(Project, id)
+        if not db_project:
+            raise HTTPException(404, "Project not found")
+        return db_project
 
 
-@router.put("/projects/{id}")
-async def replace_project(id: UUID, project: Project):
+@router.patch("/projects/{id}", response_model=Project)
+async def edit_project(id: UUID, project: ProjectUpdate):
     with Session(engine) as session:
-        statement = select(Project).where(Project.id == id)
-        project = session.exec(statement).one()
-        return project
+        db_project = session.get(Project, id)
+        if not db_project:
+            raise HTTPException(HTTPStatus.NOT_FOUND, "Project not found")
+        db_project.sqlmodel_update(project.model_dump(exclude_unset=True))
+        session.add(db_project)
+        session.commit()
+        session.refresh(db_project)
+        return db_project
 
 
-@router.delete("/projects/{id}")
+@router.delete("/projects/{id}", status_code=HTTPStatus.NO_CONTENT)
 async def delete_project(id: UUID):
     with Session(engine) as session:
         statement = select(Project).where(Project.id == id)

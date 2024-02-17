@@ -213,13 +213,13 @@ files = [
 
 [[package]]
 name = "commitizen"
-version = "3.14.1"
+version = "3.15.0"
 description = "Python commitizen client tool"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "commitizen-3.14.1-py3-none-any.whl", hash = "sha256:e0f0bb2eb19a6bcc540902d32e5e3b53c2f7636e888bb1894f83efb416af8762"},
-    {file = "commitizen-3.14.1.tar.gz", hash = "sha256:21e19143d209fd6b1feb6332430ad91cf5d37ba09990c74d1f941ef1e9087898"},
+    {file = "commitizen-3.15.0-py3-none-any.whl", hash = "sha256:5f9f9097f1f14c943982fe159905b1e895f4686f15b7aaa62a1e913fa89f2d6f"},
+    {file = "commitizen-3.15.0.tar.gz", hash = "sha256:10b9cc1013a87aaca30562f9f5ac6ddaad47c336f7eee6fbfd11e92b820eee39"},
 ]
 
 [package.dependencies]
@@ -259,22 +259,22 @@ files = [
 
 [[package]]
 name = "dnspython"
-version = "2.5.0"
+version = "2.6.0"
 description = "DNS toolkit"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "dnspython-2.5.0-py3-none-any.whl", hash = "sha256:6facdf76b73c742ccf2d07add296f178e629da60be23ce4b0a9c927b1e02c3a6"},
-    {file = "dnspython-2.5.0.tar.gz", hash = "sha256:a0034815a59ba9ae888946be7ccca8f7c157b286f8455b379c692efb51022a15"},
+    {file = "dnspython-2.6.0-py3-none-any.whl", hash = "sha256:44c40af3bffed66e3307cea9ab667fd583e138ecc0777b18f262a9dae034e5fa"},
+    {file = "dnspython-2.6.0.tar.gz", hash = "sha256:233f871ff384d84c33b2eaf4358ffe7f8927eae3b257ad8467f9bdba7e7ac6bc"},
 ]
 
 [package.extras]
-dev = ["black (>=23.1.0)", "coverage (>=7.0)", "flake8 (>=5.0.3)", "mypy (>=1.0.1)", "pylint (>=2.7)", "pytest (>=6.2.5)", "pytest-cov (>=3.0.0)", "sphinx (>=7.0.0)", "twine (>=4.0.0)", "wheel (>=0.41.0)"]
+dev = ["black (>=23.1.0)", "coverage (>=7.0)", "flake8 (>=7)", "mypy (>=1.8)", "pylint (>=3)", "pytest (>=7.4)", "pytest-cov (>=4.1.0)", "sphinx (>=7.2.0)", "twine (>=4.0.0)", "wheel (>=0.42.0)"]
 dnssec = ["cryptography (>=41)"]
-doh = ["h2 (>=4.1.0)", "httpcore (>=0.17.3)", "httpx (>=0.25.1)"]
-doq = ["aioquic (>=0.9.20)"]
-idna = ["idna (>=2.1)"]
-trio = ["trio (>=0.14)"]
+doh = ["h2 (>=4.1.0)", "httpcore (>=1.0.0)", "httpx (>=0.26.0)"]
+doq = ["aioquic (>=0.9.25)"]
+idna = ["idna (>=3.6)"]
+trio = ["trio (>=0.23)"]
 wmi = ["wmi (>=1.5.1)"]
 
 [[package]]
@@ -1006,18 +1006,22 @@ all = ["pendulum (>=3.0.0,<4.0.0)", "phonenumbers (>=8,<9)", "pycountry (>=23,<2
 
 [[package]]
 name = "pydantic-settings"
-version = "2.1.0"
+version = "2.2.0"
 description = "Settings management using Pydantic"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pydantic_settings-2.1.0-py3-none-any.whl", hash = "sha256:7621c0cb5d90d1140d2f0ef557bdf03573aac7035948109adf2574770b77605a"},
-    {file = "pydantic_settings-2.1.0.tar.gz", hash = "sha256:26b1492e0a24755626ac5e6d715e9077ab7ad4fb5f19a8b7ed7011d52f36141c"},
+    {file = "pydantic_settings-2.2.0-py3-none-any.whl", hash = "sha256:5f7bcaf9ad4419559dc5ac155c0324a9aeb2547c60471ee7c7d026f467a6b515"},
+    {file = "pydantic_settings-2.2.0.tar.gz", hash = "sha256:648d0a76673e69c51278979cba2e83cf16a23d57519bfd7e553d1c3f37db5560"},
 ]
 
 [package.dependencies]
 pydantic = ">=2.3.0"
 python-dotenv = ">=0.21.0"
+
+[package.extras]
+toml = ["tomlkit (>=0.12)"]
+yaml = ["pyyaml (>=6.0.1)"]
 
 [[package]]
 name = "pygments"
@@ -1036,13 +1040,13 @@ windows-terminal = ["colorama (>=0.4.6)"]
 
 [[package]]
 name = "pytest"
-version = "8.0.0"
+version = "8.0.1"
 description = "pytest: simple powerful testing with Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pytest-8.0.0-py3-none-any.whl", hash = "sha256:50fb9cbe836c3f20f0dfa99c565201fb75dc54c8d76373cd1bde06b06657bdb6"},
-    {file = "pytest-8.0.0.tar.gz", hash = "sha256:249b1b0864530ba251b7438274c4d251c58d868edaaec8762893ad4a0d71c36c"},
+    {file = "pytest-8.0.1-py3-none-any.whl", hash = "sha256:3e4f16fe1c0a9dc9d9389161c127c3edc5d810c38d6793042fb81d9f48a59fca"},
+    {file = "pytest-8.0.1.tar.gz", hash = "sha256:267f6563751877d772019b13aacbe4e860d73fe8f651f28112e9ac37de7513ae"},
 ]
 
 [package.dependencies]
@@ -1338,13 +1342,13 @@ sqlcipher = ["sqlcipher3_binary"]
 
 [[package]]
 name = "sqlmodel"
-version = "0.0.14"
+version = "0.0.16"
 description = "SQLModel, SQL databases in Python, designed for simplicity, compatibility, and robustness."
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
-    {file = "sqlmodel-0.0.14-py3-none-any.whl", hash = "sha256:accea3ff5d878e41ac439b11e78613ed61ce300cfcb860e87a2d73d4884cbee4"},
-    {file = "sqlmodel-0.0.14.tar.gz", hash = "sha256:0bff8fc94af86b44925aa813f56cf6aabdd7f156b73259f2f60692c6a64ac90e"},
+    {file = "sqlmodel-0.0.16-py3-none-any.whl", hash = "sha256:b972f5d319580d6c37ecc417881f6ec4d1ad3ed3583d0ac0ed43234a28bf605a"},
+    {file = "sqlmodel-0.0.16.tar.gz", hash = "sha256:966656f18a8e9a2d159eb215b07fb0cf5222acfae3362707ca611848a8a06bd1"},
 ]
 
 [package.dependencies]
@@ -1788,4 +1792,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "61c61a5aa0aebc2a7562f5fc4f544636698addadcf841e4d0fe64ad2b04c9d2d"
+content-hash = "943186cd9f9c6002f5e4221eea04b219c7f0e8e590a6683a615aca6ca5027353"
