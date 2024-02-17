@@ -1,19 +1,25 @@
-from typing import Union
+from contextlib import asynccontextmanager
 
 import uvicorn
 from fastapi import FastAPI
 
-app = FastAPI()
+from .db import create_db_and_tables
+from .project_manager.endpoints import router
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    create_db_and_tables()
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
+app.include_router(router)
 
 
 @app.get("/")
 async def read_root():
     return {"Hello": "World"}
-
-
-@app.get("/items/{item_id}")
-async def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
 
 
 def serve(port: int = 8080):
