@@ -13,11 +13,11 @@ router = APIRouter()
 @router.post("/projects", response_model=Project, status_code=HTTPStatus.CREATED)
 async def create_project(project: ProjectCreate):
     with Session(engine) as session:
-        project_db = Project.model_validate(project)
-        session.add(project_db)
+        db_project = Project.model_validate(project)
+        session.add(db_project)
         session.commit()
-        session.refresh(project_db)
-        return project_db
+        session.refresh(db_project)
+        return db_project
 
 
 @router.get("/projects", response_model=list[Project])
@@ -53,7 +53,8 @@ async def edit_project(id: UUID, project: ProjectUpdate):
 @router.delete("/projects/{id}", status_code=HTTPStatus.NO_CONTENT)
 async def delete_project(id: UUID):
     with Session(engine) as session:
-        statement = select(Project).where(Project.id == id)
-        project = session.exec(statement).one()
-        session.delete(project)
+        db_project = session.get(Project, id)
+        if not db_project:
+            raise HTTPException(HTTPStatus.NOT_FOUND, "Project not found")
+        session.delete(db_project)
         session.commit()
