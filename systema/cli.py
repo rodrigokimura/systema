@@ -8,8 +8,8 @@ app = typer.Typer()
 
 
 @app.command(help="Start server")
-def serve():
-    _serve()
+def serve(dev: bool = typer.Option(False)):
+    _serve(dev=dev)
 
 
 @app.command(help="Flush database")

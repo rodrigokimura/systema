@@ -24,5 +24,5 @@ async def read_root():
     return {"Hello": "World"}
 
 
-def serve(port: int = 8080):
-    uvicorn.run(app, host="0.0.0.0", port=port)
+def serve(port: int = 8080, dev: bool = False):
+    uvicorn.run("systema.server.main:app", host="0.0.0.0", port=port, reload=dev)
