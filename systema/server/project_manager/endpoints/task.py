@@ -62,4 +62,5 @@ async def delete_project(project_id: UUID, id: UUID):
         if task := session.exec(statement).first():
             session.delete(task)
             session.commit()
+            return
         raise HTTPException(HTTPStatus.NOT_FOUND, "Task not found")
