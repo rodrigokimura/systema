@@ -4,7 +4,7 @@ import uvicorn
 from fastapi import FastAPI
 
 from .db import create_db_and_tables
-from .project_manager.endpoints import router
+from .project_manager.endpoints.project import router as project_router
 
 
 @asynccontextmanager
@@ -14,7 +14,7 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-app.include_router(router)
+app.include_router(project_router)
 
 
 @app.get("/")

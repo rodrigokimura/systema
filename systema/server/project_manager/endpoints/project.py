@@ -4,13 +4,13 @@ from uuid import UUID
 from fastapi import APIRouter, HTTPException
 from sqlmodel import Session, select
 
-from ..db import engine
-from .models import Project, ProjectCreate, ProjectUpdate
+from ...db import engine
+from ..models.project import Project, ProjectCreate, ProjectRead, ProjectUpdate
 
 router = APIRouter()
 
 
-@router.post("/projects", response_model=Project, status_code=HTTPStatus.CREATED)
+@router.post("/projects", response_model=ProjectRead, status_code=HTTPStatus.CREATED)
 async def create_project(project: ProjectCreate):
     with Session(engine) as session:
         db_project = Project.model_validate(project)
@@ -20,7 +20,7 @@ async def create_project(project: ProjectCreate):
         return db_project
 
 
-@router.get("/projects", response_model=list[Project])
+@router.get("/projects", response_model=list[ProjectRead])
 async def list_projects():
     with Session(engine) as session:
         statement = select(Project)
@@ -28,7 +28,7 @@ async def list_projects():
         return projects
 
 
-@router.get("/projects/{id}", response_model=Project)
+@router.get("/projects/{id}", response_model=ProjectRead)
 async def get_project(id: UUID):
     with Session(engine) as session:
         db_project = session.get(Project, id)
@@ -37,7 +37,7 @@ async def get_project(id: UUID):
         return db_project
 
 
-@router.patch("/projects/{id}", response_model=Project)
+@router.patch("/projects/{id}", response_model=ProjectRead)
 async def edit_project(id: UUID, project: ProjectUpdate):
     with Session(engine) as session:
         db_project = session.get(Project, id)
