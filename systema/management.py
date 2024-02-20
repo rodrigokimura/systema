@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from nanoid import generate
+from nanoid.resources import alphabet, size
 from pydantic import DirectoryPath, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -21,6 +22,8 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = Field(default=30)
     base_path: DirectoryPath = Field(default=str(BASE_DIR))
     db_address: str = Field(default=f"sqlite:///{BASE_DIR}/{DB_FILENAME}")
+    nanoid_alphabet: str = Field(default=alphabet)
+    nanoid_size: int = Field(default=size)
 
     def to_dotenv(self, upper_case: bool = True, replace: bool = True):
         content = ""

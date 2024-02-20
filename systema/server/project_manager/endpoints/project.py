@@ -1,5 +1,3 @@
-from uuid import UUID
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 
@@ -39,7 +37,7 @@ async def list_projects():
 
 
 @router.get("/{id}", response_model=ProjectRead)
-async def get_project(id: UUID):
+async def get_project(id: str):
     with Session(engine) as session:
         if project := session.get(Project, id):
             return project
@@ -47,7 +45,7 @@ async def get_project(id: UUID):
 
 
 @router.patch("/{id}", response_model=ProjectRead)
-async def edit_project(id: UUID, project: ProjectUpdate):
+async def edit_project(id: str, project: ProjectUpdate):
     with Session(engine) as session:
         if db_project := session.get(Project, id):
             db_project.sqlmodel_update(project.model_dump(exclude_unset=True))
@@ -59,7 +57,7 @@ async def edit_project(id: UUID, project: ProjectUpdate):
 
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_project(id: UUID):
+async def delete_project(id: str):
     with Session(engine) as session:
         if project := session.get(Project, id):
             session.delete(project)

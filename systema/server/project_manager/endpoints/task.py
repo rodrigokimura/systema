@@ -1,5 +1,3 @@
-from uuid import UUID
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 
@@ -21,7 +19,7 @@ router = APIRouter(
 
 
 @router.post("/", response_model=TaskRead, status_code=status.HTTP_201_CREATED)
-async def create_task(project_id: UUID, task: TaskCreate):
+async def create_task(project_id: str, task: TaskCreate):
     with Session(engine) as session:
         if (project := session.get(Project, project_id)) and project.id:
             db_task = Task(name=task.name, project_id=project.id)
@@ -33,7 +31,7 @@ async def create_task(project_id: UUID, task: TaskCreate):
 
 
 @router.get("/", response_model=list[TaskRead])
-async def list_tasks(project_id: UUID):
+async def list_tasks(project_id: str):
     with Session(engine) as session:
         statement = select(Task).where(Task.project_id == project_id)
         if tasks := session.exec(statement).all():
@@ -42,7 +40,7 @@ async def list_tasks(project_id: UUID):
 
 
 @router.get("/{id}", response_model=TaskRead)
-async def get_task(project_id: UUID, id: UUID):
+async def get_task(project_id: str, id: str):
     with Session(engine) as session:
         statement = select(Task).where(Task.project_id == project_id, Task.id == id)
         if task := session.exec(statement).first():
@@ -51,7 +49,7 @@ async def get_task(project_id: UUID, id: UUID):
 
 
 @router.patch("/{id}", response_model=TaskRead)
-async def edit_task(project_id: UUID, id: UUID, task: TaskUpdate):
+async def edit_task(project_id: str, id: str, task: TaskUpdate):
     with Session(engine) as session:
         statement = select(Task).where(Task.project_id == project_id, Task.id == id)
         if db_task := session.exec(statement).first():
@@ -64,7 +62,7 @@ async def edit_task(project_id: UUID, id: UUID, task: TaskUpdate):
 
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_project(project_id: UUID, id: UUID):
+async def delete_project(project_id: str, id: str):
     with Session(engine) as session:
         statement = select(Task).where(Task.project_id == project_id, Task.id == id)
         if task := session.exec(statement).first():
