@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "systema"
-version = "0.0.1a2"
+version = "0.0.1a3"
 description = ""
 authors = ["Rodrigo Eiti Kimura <rodrigoeitikimura@gmail.com>"]
 readme = "README.md"
@@ -42,7 +42,7 @@ extend-select = ["I"]
 ignore = []
 
 [tool.commitizen]
-version = "0.0.1a2"
+version = "0.0.1a3"
 tag_format = "v$version"
 version_files = [
     "systema/__version__.py",
