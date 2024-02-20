@@ -30,10 +30,15 @@ def setup():
             type=bool,
         )
         if replace:
-            new_settings = Settings(_env_file=None)  # type: ignore
-            new_settings.to_dotenv()
-            print(f"New config file generated at {new_settings.base_path / '.env'}")
-            settings = new_settings
+            settings = Settings(_env_file=None)  # type: ignore
+            settings.to_dotenv()
+            print(
+                f"New config file generated at {settings.base_path / DOTENV_FILENAME}"
+            )
+
+    else:
+        print(f"config file generated at {settings.base_path / DOTENV_FILENAME}")
+        settings.to_dotenv()
 
     if settings.check_db():
         replace = typer.prompt(
