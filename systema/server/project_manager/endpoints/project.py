@@ -1,13 +1,23 @@
 from http import HTTPStatus
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 
-from ...db import engine
-from ..models.project import Project, ProjectCreate, ProjectRead, ProjectUpdate
+from systema.server.auth.utils import get_current_active_user
+from systema.server.db import engine
+from systema.server.project_manager.models.project import (
+    Project,
+    ProjectCreate,
+    ProjectRead,
+    ProjectUpdate,
+)
 
-router = APIRouter(prefix="/projects", tags=["projects"])
+router = APIRouter(
+    prefix="/projects",
+    tags=["projects"],
+    dependencies=[Depends(get_current_active_user)],
+)
 
 
 @router.post("/", response_model=ProjectRead, status_code=HTTPStatus.CREATED)
