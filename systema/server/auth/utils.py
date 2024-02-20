@@ -1,10 +1,10 @@
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
+import bcrypt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from sqlmodel import Session
 
 from systema.management import settings
@@ -12,7 +12,6 @@ from systema.management import settings
 from ..db import engine
 from .models import TokenData, User
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
@@ -29,11 +28,17 @@ def create_superuser(username: str, password: str):
 
 
 def verify_password(plain_password: str, hashed_password: str):
-    return pwd_context.verify(plain_password, hashed_password)
+    return bcrypt.checkpw(
+        password=plain_password.encode(),
+        hashed_password=hashed_password.encode(),
+    )
 
 
 def get_password_hash(password: str):
-    return pwd_context.hash(password)
+    return bcrypt.hashpw(
+        password=password.encode(),
+        salt=bcrypt.gensalt(),
+    ).decode()
 
 
 def get_user(username: str):
