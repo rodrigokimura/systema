@@ -7,6 +7,7 @@ from systema.management import (
 )
 from systema.server.auth.utils import create_superuser
 from systema.server.db import create_db_and_tables, show_tables
+from systema.tui.app import SystemaTUIApp
 
 from .__version__ import VERSION
 from .server.main import serve as _serve
@@ -17,6 +18,17 @@ app = typer.Typer()
 @app.command(help="Start server")
 def serve(dev: bool = typer.Option(False)):
     _serve(dev=dev)
+
+
+@app.command(help="Start TUI client")
+def tui(
+    remote: bool = typer.Option(False, help="Enable access to remote server via HTTP"),
+):
+    if remote:
+        raise NotImplementedError("Sorry! Not available yet.")
+
+    app = SystemaTUIApp()
+    app.run()
 
 
 @app.command(help="Run setup wizard")
