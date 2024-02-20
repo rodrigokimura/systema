@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 import uvicorn
 from fastapi import FastAPI
 
+from systema.__version__ import VERSION
 from systema.server.auth.endpoints import router as auth_router
 from systema.server.db import create_db_and_tables
 from systema.server.project_manager.endpoints.project import router as project_router
@@ -15,7 +16,7 @@ async def lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan, version=VERSION)
 
 app.include_router(auth_router)
 app.include_router(project_router)
