@@ -1,7 +1,6 @@
-from http import HTTPStatus
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 
 from systema.server.auth.utils import get_current_active_user
@@ -20,7 +19,7 @@ router = APIRouter(
 )
 
 
-@router.post("/", response_model=ProjectRead, status_code=HTTPStatus.CREATED)
+@router.post("/", response_model=ProjectRead, status_code=status.HTTP_201_CREATED)
 async def create_project(project: ProjectCreate):
     with Session(engine) as session:
         db_project = Project.model_validate(project)
@@ -36,7 +35,7 @@ async def list_projects():
         statement = select(Project)
         if projects := session.exec(statement).all():
             return projects
-        raise HTTPException(HTTPStatus.NOT_FOUND, "Projects not found")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Projects not found")
 
 
 @router.get("/{id}", response_model=ProjectRead)
@@ -44,7 +43,7 @@ async def get_project(id: UUID):
     with Session(engine) as session:
         if project := session.get(Project, id):
             return project
-        raise HTTPException(HTTPStatus.NOT_FOUND, "Project not found")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Project not found")
 
 
 @router.patch("/{id}", response_model=ProjectRead)
@@ -56,13 +55,13 @@ async def edit_project(id: UUID, project: ProjectUpdate):
             session.commit()
             session.refresh(db_project)
             return db_project
-        raise HTTPException(HTTPStatus.NOT_FOUND, "Project not found")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Project not found")
 
 
-@router.delete("/{id}", status_code=HTTPStatus.NO_CONTENT)
+@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_project(id: UUID):
     with Session(engine) as session:
         if project := session.get(Project, id):
             session.delete(project)
             session.commit()
-        raise HTTPException(HTTPStatus.NOT_FOUND, "Project not found")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Project not found")

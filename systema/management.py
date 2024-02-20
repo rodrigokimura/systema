@@ -1,6 +1,9 @@
-import os
+from pathlib import Path
 
+from pydantic import DirectoryPath, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+BASE_DIR = Path(__name__).resolve().parent
 
 
 class Settings(BaseSettings):
@@ -11,12 +14,10 @@ class Settings(BaseSettings):
     )
 
     secret_key: str = ""
-    algorithm: str = ""
-    access_token_expire_minutes: int = 30
+    algorithm: str = Field(default="HS256")
+    access_token_expire_minutes: int = Field(default=30)
+    base_path: DirectoryPath = Field(default=str(BASE_DIR))
+    db_address: str = Field(default=f"sqlite:///{BASE_DIR}/database.db")
 
 
 settings = Settings()
-
-
-def flush():
-    os.remove("database.db")

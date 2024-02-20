@@ -7,7 +7,8 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from sqlmodel import Session
 
-from ...management import settings
+from systema.management import settings
+
 from ..db import engine
 from .models import TokenData, User
 
@@ -17,11 +18,14 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 def create_superuser(username: str, password: str):
     with Session(engine) as session:
-        user = User(username=username, hashed_password=get_password_hash(password))
+        user = User(
+            username=username,
+            hashed_password=get_password_hash(password),
+            superuser=True,
+        )
         session.add(user)
         session.commit()
         session.refresh(user)
-        print(user.hashed_password)
 
 
 def verify_password(plain_password: str, hashed_password: str):
@@ -86,4 +90,12 @@ async def get_current_active_user(
 ):
     if current_user.active:
         return current_user
-    raise HTTPException(status_code=400, detail="Inactive user")
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Inactive user")
+
+
+async def get_current_superuser(
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    if current_user.superuser:
+        return current_user
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not a superuser")

@@ -1,7 +1,6 @@
-from http import HTTPStatus
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 
 from systema.server.auth.utils import get_current_active_user
@@ -21,7 +20,7 @@ router = APIRouter(
 )
 
 
-@router.post("/", response_model=TaskRead, status_code=HTTPStatus.CREATED)
+@router.post("/", response_model=TaskRead, status_code=status.HTTP_201_CREATED)
 async def create_task(project_id: UUID, task: TaskCreate):
     with Session(engine) as session:
         if (project := session.get(Project, project_id)) and project.id:
@@ -30,7 +29,7 @@ async def create_task(project_id: UUID, task: TaskCreate):
             session.commit()
             session.refresh(db_task)
             return db_task
-        raise HTTPException(HTTPStatus.NOT_FOUND, "Task not found")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Task not found")
 
 
 @router.get("/", response_model=list[TaskRead])
@@ -39,7 +38,7 @@ async def list_tasks(project_id: UUID):
         statement = select(Task).where(Task.project_id == project_id)
         if tasks := session.exec(statement).all():
             return tasks
-        raise HTTPException(HTTPStatus.NOT_FOUND, "Tasks not found")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Tasks not found")
 
 
 @router.get("/{id}", response_model=TaskRead)
@@ -48,7 +47,7 @@ async def get_task(project_id: UUID, id: UUID):
         statement = select(Task).where(Task.project_id == project_id, Task.id == id)
         if task := session.exec(statement).first():
             return task
-        raise HTTPException(404, "Task not found")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Task not found")
 
 
 @router.patch("/{id}", response_model=TaskRead)
@@ -61,10 +60,10 @@ async def edit_task(project_id: UUID, id: UUID, task: TaskUpdate):
             session.commit()
             session.refresh(db_task)
             return db_task
-        raise HTTPException(HTTPStatus.NOT_FOUND, "Task not found")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Task not found")
 
 
-@router.delete("/{id}", status_code=HTTPStatus.NO_CONTENT)
+@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_project(project_id: UUID, id: UUID):
     with Session(engine) as session:
         statement = select(Task).where(Task.project_id == project_id, Task.id == id)
@@ -72,4 +71,4 @@ async def delete_project(project_id: UUID, id: UUID):
             session.delete(task)
             session.commit()
             return
-        raise HTTPException(HTTPStatus.NOT_FOUND, "Task not found")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Task not found")
