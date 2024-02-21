@@ -1,0 +1,29 @@
+ModalScreen {
+  align: center middle;
+}
+
+ProjectModal > Grid {
+  layout: grid;
+  grid-size: 2 3;
+  width: 60;
+  height: 10;
+  border: round white 50%;
+}
+
+ProjectModal > Grid > Label {
+  column-span: 2;
+  height: 1fr;
+  width: 2fr;
+  content-align: center middle;
+}
+
+ProjectModal > Grid > Input {
+  column-span: 2;
+  height: 1fr;
+  width: 2fr;
+  content-align: center middle;
+}
+
+ProjectModal > Grid > Button {
+  width: 100%;
+}
