@@ -1,9 +1,7 @@
-from collections.abc import Iterable
-
 from textual import on
 from textual.app import ComposeResult
-from textual.binding import BindingType
 from textual.containers import Grid
+from textual.events import Key
 from textual.screen import ModalScreen
 from textual.widgets import Button, Input, Label
 
@@ -28,14 +26,13 @@ class Confirmation(ModalScreen[bool]):
     def __init__(
         self,
         message: str,
-        extra_bindings: Iterable[BindingType] | None = None,
+        extra_bindings_for_confirm: set[str] | None = None,
         name: str | None = None,
         id: str | None = None,
         classes: str | None = None,
     ) -> None:
         self.message = message
-        if extra_bindings:
-            self.BINDINGS.extend(extra_bindings)
+        self.extra_bindings = extra_bindings_for_confirm or set()
         super().__init__(name, id, classes)
 
     def compose(self) -> ComposeResult:
@@ -56,6 +53,10 @@ class Confirmation(ModalScreen[bool]):
         actions = {"confirm": self.action_confirm, "cancel": self.action_cancel}
         if id := message.button.id:
             actions[id]()
+
+    def on_key(self, event: Key):
+        if event.key in self.extra_bindings:
+            self.action_confirm()
 
 
 class ProjectModal(ModalScreen[ProjectCreate | ProjectUpdate]):
@@ -89,14 +90,6 @@ class ProjectModal(ModalScreen[ProjectCreate | ProjectUpdate]):
             Button("Submit", "primary", id="submit"),
         )
 
-    @on(Input.Changed)
-    def store_data(self, message: Input.Changed):
-        self.form_data[message.input.name] = message.value
-
-    def on_input_submitted(self, message: Input.Submitted):
-        print(f"Input submitted {message.input}")
-        self.action_submit()
-
     def action_submit(self):
         if self.project:
             changed_data = ProjectUpdate(**self.form_data)
@@ -124,7 +117,17 @@ class ProjectModal(ModalScreen[ProjectCreate | ProjectUpdate]):
             i.clear()
         self.query(Input).filter("#name").only_one().focus()
 
-    def on_button_pressed(self, message: Button.Pressed):
+    @on(Input.Changed)
+    def handle_input_changed(self, message: Input.Changed):
+        self.form_data[message.input.name] = message.value
+
+    @on(Input.Submitted)
+    def handle_input_submitted(self, message: Input.Submitted):
+        print(f"Input submitted {message.input}")
+        self.action_submit()
+
+    @on(Button.Pressed)
+    def handle_button_pressed(self, message: Button.Pressed):
         actions = {"submit": self.action_submit, "cancel": self.action_cancel}
         if id := message.button.id:
             actions[id]()

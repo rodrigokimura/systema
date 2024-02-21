@@ -61,12 +61,7 @@ class SystemaTUIApp(App):
     @work
     async def action_delete_project(self):
         if item := self.lv.highlighted_child:
-            if await self.push_screen_wait(
-                Confirmation(
-                    "Delete project?",
-                    [("d", "submit", "Submit")],
-                )
-            ):
+            if await self.push_screen_wait(Confirmation("Delete project?", {"d"})):
                 project = item.query(ProjectItem).first().project
                 ProjectProxy.delete(project.id)
                 self.notify("Project deleted")
