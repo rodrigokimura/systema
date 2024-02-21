@@ -23,6 +23,7 @@ def serve(dev: bool = typer.Option(False)):
 @app.command(help="Start TUI client")
 def tui(
     remote: bool = typer.Option(False, help="Enable access to remote server via HTTP"),
+    dev: bool = typer.Option(False),
 ):
     if remote:
         raise NotImplementedError("Sorry! Not available yet.")
