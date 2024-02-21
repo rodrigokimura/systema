@@ -23,3 +23,21 @@ This project is intended to be my "Productivity System".
 
 - Project Manager
 - Diagrams
+
+## Setup
+
+### Termux
+
+```bash
+cd
+mkdir -p .termux
+echo "enforce-char-based-input=true" > .termux/termux.properties
+termux-reload-settings
+
+pkg update && pkg upgrade -y
+pkg install python -y
+pkg install python-cryptography -y
+pkg install binutils -y
+apt update && apt upgrade -y
+apt install rust -y
+```
