@@ -29,4 +29,12 @@ async def read_root():
 
 
 def serve(port: int = 8080, dev: bool = False):
-    uvicorn.run("systema.server.main:app", host="0.0.0.0", port=port, reload=dev)
+    uvicorn.run(
+        "systema.server.main:app",
+        host="0.0.0.0",
+        port=port,
+        reload=dev,
+        loop="uvloop",
+        http="httptools",
+        ws="websockets",
+    )
