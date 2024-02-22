@@ -1,73 +1,34 @@
-from textual import work
-from textual.app import App, ComposeResult
-from textual.widgets import Button, Footer, Header, ListItem
+from textual import on
+from textual.app import App
+from textual.binding import Binding
 
-from systema.server.project_manager.models.project import (
-    ProjectCreate,
-    ProjectUpdate,
-)
-from systema.tui.proxy import ProjectProxy
-from systema.tui.screens.confirmation import Confirmation
-from systema.tui.screens.project_modal import ProjectModal
-from systema.tui.widgets import ListView, ProjectItem
+from systema.tui.screens.dashboard import Dashboard
+from systema.tui.screens.project_list import ProjectList
+from systema.tui.screens.project_main import ProjectMain
 
 
 class SystemaTUIApp(App):
     TITLE = "Systema"
     BINDINGS = [
-        ("q", "quit", "Quit app"),
-        ("p", "add_project", "Add project"),
-        ("e", "edit_project", "Edit project"),
-        ("d", "delete_project", "Delete project"),
+        Binding("q", "quit", "Quit", show=True),
+        Binding("escape", "quit", "Quit", show=True),
+        Binding("up", "focus_previous", "Focus previous", show=False),
+        Binding("down", "focus_next", "Focus next", show=False),
+        Binding("k", "focus_previous", "Focus previous", show=False),
+        Binding("j", "focus_next", "Focus next", show=False),
     ]
+    SCREENS = {
+        "dashboard": Dashboard(),
+        "projects": ProjectList(),
+        "project": ProjectMain(),
+    }
 
-    def compose(self) -> ComposeResult:
-        self.projects = list(ProjectProxy.all())
-        yield Header()
-        self.lv = ListView(
-            *(ListItem(ProjectItem(project)) for project in ProjectProxy.all())
-        )
-        yield self.lv
-        yield Button("Add project")
-        yield Footer()
+    def on_mount(self):
+        self.push_screen("dashboard")
 
-    async def _populate_list_view(self):
-        for project in ProjectProxy.all():
-            await self.lv.append(ListItem(ProjectItem(project)))
-
-    def action_toggle_dark(self) -> None:
-        self.dark = not self.dark
-
-    @work
-    async def action_add_project(self):
-        if data_for_creation := await self.push_screen_wait(ProjectModal()):
-            if isinstance(data_for_creation, ProjectCreate):
-                project = ProjectProxy.create(data_for_creation)
-                self.notify(f"Project created {project.name}")
-                await self.lv.clear()
-                await self._populate_list_view()
-
-    @work
-    async def action_edit_project(self):
-        if item := self.lv.highlighted_child:
-            project = item.query(ProjectItem).first().project
-            if data_for_update := await self.push_screen_wait(ProjectModal(project)):
-                if isinstance(data_for_update, ProjectUpdate):
-                    data_for_update = ProjectProxy.update(project.id, data_for_update)
-                    if data_for_update:
-                        self.notify(f"Project updated {data_for_update.name}")
-                        await self.lv.clear()
-                        await self._populate_list_view()
-
-    @work
-    async def action_delete_project(self):
-        if item := self.lv.highlighted_child:
-            if await self.push_screen_wait(Confirmation("Delete project?", {"d"})):
-                project = item.query(ProjectItem).first().project
-                ProjectProxy.delete(project.id)
-                self.notify("Project deleted")
-                await self.lv.clear()
-                await self._populate_list_view()
+    @on(ProjectList.Selected)
+    def handle_project_selection(self, message: ProjectList.Selected):
+        self.push_screen(ProjectMain(message.project))
 
 
 if __name__ == "__main__":

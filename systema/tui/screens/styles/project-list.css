@@ -1,0 +1,12 @@
+ProjectList {
+  align: center middle;
+}
+ProjectList > ListView {
+  height: 80%;
+  width: 50%;
+  border: round $primary;
+}
+
+ProjectList > Horizontal {
+  height: 3;
+}

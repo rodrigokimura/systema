@@ -1,0 +1,14 @@
+Dashboard {
+  align: center middle;
+}
+
+Dashboard .buttons {
+  align: center middle;
+  margin: 1;
+  border: round $primary;
+  width: 80%;
+}
+
+Dashboard Button {
+  margin: 1;
+}
