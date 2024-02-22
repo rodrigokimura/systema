@@ -7,7 +7,8 @@ from systema.server.project_manager.models.project import (
     ProjectUpdate,
 )
 from systema.tui.proxy import ProjectProxy
-from systema.tui.screens import Confirmation, ProjectModal
+from systema.tui.screens.confirmation import Confirmation
+from systema.tui.screens.project_modal import ProjectModal
 from systema.tui.widgets import ListView, ProjectItem
 
 
