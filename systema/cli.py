@@ -6,25 +6,42 @@ from systema.management import (
     Settings,
 )
 from systema.server.auth.utils import create_superuser
-from systema.server.db import create_db_and_tables, show_tables
+from systema.server.db import create_db_and_tables
 from systema.tui.app import SystemaTUIApp
 
 from .__version__ import VERSION
 from .server.main import serve as _serve
 
-app = typer.Typer()
+ART = r"""
+  ___         _
+ / __|_  _ __| |_ ___ _ __  __ _
+ \__ \ || (_-<  _/ -_) '  \/ _` |
+ |___/\_, /__/\__\___|_|_|_\__,_|
+      |__/
+"""
 
 
-@app.command(help="Start server")
+def print_art():
+    print(ART)
+
+
+app = typer.Typer(name="systema", callback=print_art, no_args_is_help=True)
+
+
+@app.command()
 def serve(dev: bool = typer.Option(False)):
+    """Start web server"""
+
     _serve(dev=dev)
 
 
-@app.command(help="Start TUI client")
+@app.command()
 def tui(
     remote: bool = typer.Option(False, help="Enable access to remote server via HTTP"),
     dev: bool = typer.Option(False),
 ):
+    """Start TUI client"""
+
     if remote:
         raise NotImplementedError("Sorry! Not available yet.")
 
@@ -32,8 +49,9 @@ def tui(
     app.run()
 
 
-@app.command(help="Run setup wizard")
+@app.command()
 def setup():
+    """Run setup wizard"""
     from systema.management import settings
 
     if settings.check_dotenv():
@@ -80,18 +98,13 @@ def prompt_for_superuser():
 
 @app.command(help="Create superuser")
 def superuser():
+    """Create superuser"""
+
     prompt_for_superuser()
 
 
 @app.command(help="Show version")
 def version():
+    """Show version"""
+
     print(VERSION)
-
-
-@app.command(help="Show tables")
-def tables():
-    show_tables()
-
-
-if __name__ == "__main__":
-    app()
