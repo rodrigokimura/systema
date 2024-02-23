@@ -1,9 +1,9 @@
 import enum
 from datetime import datetime
 
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field
 
-from systema.utils import BaseTableModel
+from systema.base import BaseModel, IdMixin
 
 
 class Status(enum.Enum):
@@ -12,12 +12,12 @@ class Status(enum.Enum):
     DONE = "done"
 
 
-class TaskBase(SQLModel):
+class TaskBase(BaseModel):
     name: str
     status: Status = Status.NOT_STARTED
 
 
-class Task(TaskBase, BaseTableModel, table=True):
+class Task(TaskBase, IdMixin, table=True):
     created_at: datetime = Field(default_factory=datetime.now, index=True)
     project_id: str = Field(..., foreign_key="project.id")
 
@@ -32,6 +32,6 @@ class TaskRead(TaskBase):
     status: Status
 
 
-class TaskUpdate(SQLModel):
+class TaskUpdate(BaseModel):
     name: str | None = None
     status: Status | None = None

@@ -1,6 +1,3 @@
-from sqlmodel import Session, select
-
-from systema.server.db import engine
 from systema.server.project_manager.models.project import (
     Project,
     ProjectCreate,
@@ -11,10 +8,7 @@ from systema.server.project_manager.models.project import (
 class ProjectProxy:
     @staticmethod
     def all():
-        with Session(engine) as session:
-            statement = select(Project)
-            projects = session.exec(statement).all()
-            return projects
+        return Project.list()
 
     @staticmethod
     def create(data: ProjectCreate):

@@ -36,7 +36,7 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-systema = "systema.cli:app"
+systema = "systema.cli.main:app"
 
 [tool.ruff]
 line-length = 88

@@ -1,5 +1,7 @@
 import typer
+from rich import print
 
+from systema.__version__ import VERSION
 from systema.management import (
     DB_FILENAME,
     DOTENV_FILENAME,
@@ -7,10 +9,10 @@ from systema.management import (
 )
 from systema.server.auth.utils import create_superuser
 from systema.server.db import create_db_and_tables
+from systema.server.main import serve as _serve
 from systema.tui.app import SystemaTUIApp
 
-from .__version__ import VERSION
-from .server.main import serve as _serve
+from .query import app as query_app
 
 ART = r"""
   ___         _
@@ -22,10 +24,11 @@ ART = r"""
 
 
 def print_art():
-    print(ART)
+    typer.echo(ART)
 
 
 app = typer.Typer(name="systema", callback=print_art, no_args_is_help=True)
+app.add_typer(query_app)
 
 
 @app.command()

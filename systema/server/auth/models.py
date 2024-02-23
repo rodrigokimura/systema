@@ -1,16 +1,18 @@
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field
+
+from systema.base import BaseModel
 
 
-class Token(SQLModel):
+class Token(BaseModel):
     access_token: str
     token_type: str
 
 
-class TokenData(SQLModel):
+class TokenData(BaseModel):
     username: str | None = None
 
 
-class UserBase(SQLModel):
+class UserBase(BaseModel):
     username: str = Field(..., primary_key=True)
     active: bool = True
     superuser: bool = False

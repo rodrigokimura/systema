@@ -19,7 +19,7 @@ def create_superuser(username: str, password: str):
     with Session(engine) as session:
         user = User(
             username=username,
-            hashed_password=get_password_hash(password),
+            hashed_password=get_hash(password),
             superuser=True,
         )
         session.add(user)
@@ -34,7 +34,7 @@ def verify_password(plain_password: str, hashed_password: str):
     )
 
 
-def get_password_hash(password: str):
+def get_hash(password: str):
     return bcrypt.hashpw(
         password=password.encode(),
         salt=bcrypt.gensalt(),
