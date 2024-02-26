@@ -3,7 +3,6 @@ from sqlmodel import Session, select
 
 from systema.server.auth.utils import get_current_active_user
 from systema.server.db import engine
-from systema.server.project_manager.models.project import Project
 from systema.server.project_manager.models.task import (
     Task,
     TaskCreate,
@@ -20,14 +19,9 @@ router = APIRouter(
 
 @router.post("/", response_model=TaskRead, status_code=status.HTTP_201_CREATED)
 async def create_task(project_id: str, task: TaskCreate):
-    with Session(engine) as session:
-        if (project := session.get(Project, project_id)) and project.id:
-            db_task = Task(name=task.name, project_id=project.id)
-            session.add(db_task)
-            session.commit()
-            session.refresh(db_task)
-            return db_task
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Task not found")
+    if db_task := Task.create(task, project_id):
+        return db_task
+    raise HTTPException(status.HTTP_404_NOT_FOUND, "Task not found")
 
 
 @router.get("/", response_model=list[TaskRead])

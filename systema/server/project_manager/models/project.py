@@ -9,11 +9,6 @@ from systema.server.db import engine
 from systema.server.project_manager.models.list import List
 
 
-def get_session():
-    with Session(engine) as session:
-        yield session
-
-
 class ProjectBase(BaseModel):
     name: str
 
