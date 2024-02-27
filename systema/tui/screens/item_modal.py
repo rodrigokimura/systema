@@ -52,12 +52,10 @@ class ItemModal(ModalScreen[ItemCreate | ItemUpdate]):
                 name=self.query(Input).filter("#name").only_one().value,
                 order=0,
             )
-        self.notify("Submitted")
         self.dismiss(return_value)
         self.clear()
 
     def action_cancel(self):
-        self.notify("Canceled")
         self.dismiss()
         self.clear()
 
@@ -72,7 +70,6 @@ class ItemModal(ModalScreen[ItemCreate | ItemUpdate]):
 
     @on(Input.Submitted)
     def handle_input_submitted(self, message: Input.Submitted):
-        print(f"Input submitted {message.input}")
         self.action_submit()
 
     @on(Button.Pressed)
