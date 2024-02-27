@@ -1,11 +1,16 @@
-from textual import work
+from contextlib import asynccontextmanager
+
+from textual import on, work
 from textual.app import ComposeResult
 from textual.binding import Binding
+from textual.css.query import NoMatches
+from textual.reactive import var
 from textual.screen import Screen
-from textual.widgets import Footer, Header, ListItem
+from textual.widgets import Collapsible, Footer, Header, ListItem
 
 from systema.server.project_manager.models.item import ItemCreate, ItemUpdate
 from systema.server.project_manager.models.project import ProjectRead
+from systema.server.project_manager.models.task import Status
 from systema.tui.proxy import ItemProxy
 from systema.tui.screens.confirmation import Confirmation
 from systema.tui.screens.item_modal import ItemModal
@@ -23,8 +28,10 @@ class ListMain(Screen):
         Binding("ctrl+down,ctrl+j", "move_down", "Move item down", show=True),
         Binding("ctrl+up,ctrl+k", "move_up", "Move item up", show=True),
         Binding("space,enter", "toggle_item", "Toggle item", show=True),
+        Binding("t", "toggle_collapsible", "Toggle collapsible", show=True),
     ]
     CSS_PATH = "styles/list-main.css"
+    current_item: var[Item]
 
     def __init__(
         self,
@@ -41,69 +48,125 @@ class ListMain(Screen):
     def compose(self) -> ComposeResult:
         yield Header()
         if self.project:
-            self.list_view = ListView(
-                *(ListItem(Item(item)) for item in self.proxy.all())
-            )
-            yield self.list_view
+            self.unchecked_items = ListView()
+            self.checked_items = ListView()
+            yield self.unchecked_items
+        self.collapsible = Collapsible(self.checked_items, title="Completed items")
+        yield self.collapsible
         yield Footer()
+
+    async def on_mount(self):
+        await self._populate_list_view()
+
+    @asynccontextmanager
+    async def repopulate(self):
+        focus_checked = self.checked_items.has_focus
+        focus_unchecked = self.unchecked_items.has_focus
+        checked_idx = self.checked_items.index
+        unchecked_idx = self.unchecked_items.index
+        async with self.batch():
+            await self.unchecked_items.clear()
+            await self.checked_items.clear()
+            await self._populate_list_view()
+            if focus_checked:
+                self.checked_items.index = checked_idx
+            if focus_unchecked:
+                self.unchecked_items.index = unchecked_idx
+            yield
 
     async def _populate_list_view(self):
         for item in self.proxy.all():
-            await self.list_view.append(ListItem(Item(item)))
+            i = Item()
+            i.item = item
+            if item.status == Status.DONE:
+                await self.checked_items.append(ListItem(i))
+            else:
+                await self.unchecked_items.append(ListItem(i))
 
     def get_highlighted_item(self):
-        if item := self.list_view.highlighted_child:
-            return item.query(Item).first().item
+        item = self.current_item
+        item_read = item.item
+        if item_read is None:
+            raise ValueError()
+        return item, item_read
 
     @work
     async def action_add_item(self):
-        if data_for_creation := await self.app.push_screen_wait(ItemModal()):
-            if isinstance(data_for_creation, ItemCreate):
-                item = self.proxy.create(data_for_creation)
-                self.notify(f"Item created {item.name}")
-                await self.list_view.clear()
-                await self._populate_list_view()
+        data_for_creation = await self.app.push_screen_wait(ItemModal())
+        if not isinstance(data_for_creation, ItemCreate):
+            return
+        created_item = self.proxy.create(data_for_creation)
+        self.notify(f"Item created {created_item.name}")
+        async with self.repopulate():
+            self.unchecked_items.index = 0
 
     @work
     async def action_edit_item(self):
-        if item := self.get_highlighted_item():
-            current_index = self.list_view.index
-            if data_for_update := await self.app.push_screen_wait(ItemModal(item)):
-                if isinstance(data_for_update, ItemUpdate):
-                    data_for_update = self.proxy.update(item.id, data_for_update)
-                    if data_for_update:
-                        self.notify(f"Item updated {data_for_update.name}")
-                        await self.list_view.clear()
-                        await self._populate_list_view()
-                        self.list_view.index = current_index
+        item, item_read = self.get_highlighted_item()
+        data_for_update = await self.app.push_screen_wait(ItemModal(item_read))
+        if not isinstance(data_for_update, ItemUpdate):
+            return
+        updated_item = self.proxy.update(item_read.id, data_for_update)
+        self.notify(f"Item updated {updated_item.name}")
+        item.item = updated_item
 
     @work
     async def action_delete_item(self):
-        if item := self.get_highlighted_item():
-            current_index = self.list_view.index
-            if await self.app.push_screen_wait(Confirmation("Delete item?", {"d"})):
-                self.proxy.delete(item.id)
-                self.notify("Item deleted")
-                await self.list_view.clear()
-                await self._populate_list_view()
-                self.list_view.index = current_index
+        _, item_read = self.get_highlighted_item()
+        current_index = self.unchecked_items.index
+        if await self.app.push_screen_wait(Confirmation("Delete item?", {"d"})):
+            self.proxy.delete(item_read.id)
+            self.notify("Item deleted")
+            async with self.repopulate():
+                self.unchecked_items.index = current_index
 
     async def action_move_down(self):
-        if item := self.get_highlighted_item():
-            i = self.proxy.move(item.id, "down")
-            await self.list_view.clear()
-            await self._populate_list_view()
-            self.list_view.index = i.order
+        if self.checked_items.has_focus:
+            return
+        _, item_read = self.get_highlighted_item()
+        current_index = self.unchecked_items.index
+        self.proxy.move(item_read.id, "down")
+        async with self.repopulate():
+            if current_index is not None:
+                self.unchecked_items.index = current_index + 1
 
     async def action_move_up(self):
-        if item := self.get_highlighted_item():
-            i = self.proxy.move(item.id, "up")
-            await self.list_view.clear()
-            await self._populate_list_view()
-            self.list_view.index = i.order
+        if self.checked_items.has_focus:
+            return
+        _, item_read = self.get_highlighted_item()
+        current_index = self.unchecked_items.index
+        self.proxy.move(item_read.id, "up")
+        async with self.repopulate():
+            if current_index is not None:
+                self.unchecked_items.index = current_index - 1
 
     async def action_toggle_item(self):
-        if child := self.list_view.highlighted_child:
-            item = child.query(Item).first()
-            i = self.proxy.toggle(item.item.id)
-            item.checkbox.value = i.is_done()
+        item, _ = self.get_highlighted_item()
+        item.checkbox.value = not item.checkbox.value
+
+    @on(Item.Changed)
+    async def handle_item_changed(self, message: Item.Changed):
+        item_read = message.item
+        item_read = self.proxy.toggle(item_read.id)
+        async with self.repopulate():
+            pass
+
+    @on(ListView.Highlighted)
+    async def handle_listview_highlighted(self, message: ListView.Highlighted):
+        if message.item:
+            try:
+                self.current_item = message.item.query_one(Item)
+            except NoMatches:
+                pass
+
+    @on(ListView.Focus)
+    async def handle_listview_focus(self, message: ListView.Focus):
+        if list_item := message.list_view.highlighted_child:
+            self.current_item = list_item.query_one(Item)
+
+    async def action_toggle_collapsible(self):
+        self.collapsible.collapsed = not self.collapsible.collapsed
+        if self.collapsible.collapsed:
+            self.unchecked_items.focus()
+        else:
+            self.checked_items.focus()

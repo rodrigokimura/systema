@@ -34,13 +34,6 @@ class ItemModal(ModalScreen[ItemCreate | ItemUpdate]):
                 name="name",
                 value=self.item.name if self.item else "",
             ),
-            # Input(
-            #     placeholder="Order",
-            #     id="order",
-            #     name="order",
-            #     value=str(self.item.order) if self.item else "0",
-            #     type="integer",
-            # ),
             Button("Cancel", "default", id="cancel"),
             Button("Submit", "primary", id="submit"),
         )

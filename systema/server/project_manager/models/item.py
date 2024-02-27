@@ -123,13 +123,25 @@ class Item(ItemBase, table=True):
 
             if task.status == Status.DONE:
                 task.status = Status.NOT_STARTED
+                original_order = 0
             else:
                 task.status = Status.DONE
+                original_order = item.order
+                item.order = 0
 
-            session.add(task)
+            session.add_all((task, item))
             session.commit()
+
             session.refresh(item)
             session.refresh(task)
+
+            cls._reorder(
+                session, project_id, original_order, item.id, original_order == 0
+            )
+
+            session.refresh(item)
+            session.refresh(task)
+
             return item, task
 
     @classmethod
@@ -196,7 +208,10 @@ class Item(ItemBase, table=True):
                     Task.project_id == Project.id,
                     Project.id == project.id,
                 )
-                .order_by(col(Item.order).asc())
+                .order_by(
+                    col(Item.order).asc(),
+                    col(Task.status).asc(),
+                )
             )
             return session.exec(statement).all()
 
@@ -216,6 +231,7 @@ class Item(ItemBase, table=True):
                 Task.id == Item.id,
                 Task.project_id == project_id,
                 Item.order >= order,
+                Task.status != Status.DONE,
                 Item.id != exclude,
             )
             .order_by(col(Item.order).asc())
