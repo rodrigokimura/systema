@@ -3,6 +3,7 @@ from textual.app import App
 from textual.binding import Binding
 
 from systema.tui.screens.dashboard import Dashboard
+from systema.tui.screens.list_main import ListMain
 from systema.tui.screens.project_list import ProjectList
 from systema.tui.screens.project_main import ProjectMain
 
@@ -28,7 +29,7 @@ class SystemaTUIApp(App):
 
     @on(ProjectList.Selected)
     def handle_project_selection(self, message: ProjectList.Selected):
-        self.push_screen(ProjectMain(message.project))
+        self.push_screen(ListMain(message.project))
 
 
 if __name__ == "__main__":

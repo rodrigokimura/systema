@@ -59,6 +59,9 @@ class TaskRead(TaskBase):
     created_at: datetime
     status: Status
 
+    def is_done(self):
+        return self.status == Status.DONE
+
 
 class TaskUpdate(BaseModel):
     name: str | None = None

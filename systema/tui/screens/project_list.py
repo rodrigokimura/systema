@@ -6,8 +6,8 @@ from textual.screen import Screen
 from textual.widgets import Footer, Header, ListItem
 
 from systema.server.project_manager.models.project import (
-    Project,
     ProjectCreate,
+    ProjectRead,
     ProjectUpdate,
 )
 from systema.tui.proxy import ProjectProxy
@@ -27,15 +27,16 @@ class ProjectList(Screen):
     CSS_PATH = "styles/project-list.css"
 
     class Selected(Message):
-        def __init__(self, project: Project) -> None:
+        def __init__(self, project: ProjectRead) -> None:
             super().__init__()
-            self.project: Project = project
+            self.project: ProjectRead = project
 
     def compose(self) -> ComposeResult:
-        self.projects = list(ProjectProxy.all())
+        self.proxy = ProjectProxy()
+        self.projects = self.proxy.all()
         yield Header()
         self.list_view = ListView(
-            *(ListItem(ProjectItem(project)) for project in ProjectProxy.all())
+            *(ListItem(ProjectItem(project)) for project in self.proxy.all())
         )
         yield self.list_view
         yield Footer()
@@ -45,14 +46,14 @@ class ProjectList(Screen):
             return item.query(ProjectItem).first().project
 
     async def _populate_list_view(self):
-        for project in ProjectProxy.all():
+        for project in self.proxy.all():
             await self.list_view.append(ListItem(ProjectItem(project)))
 
     @work
     async def action_add_project(self):
         if data_for_creation := await self.app.push_screen_wait(ProjectModal()):
             if isinstance(data_for_creation, ProjectCreate):
-                project = ProjectProxy.create(data_for_creation)
+                project = self.proxy.create(data_for_creation)
                 self.notify(f"Project created {project.name}")
                 await self.list_view.clear()
                 await self._populate_list_view()
@@ -64,7 +65,7 @@ class ProjectList(Screen):
                 ProjectModal(project)
             ):
                 if isinstance(data_for_update, ProjectUpdate):
-                    data_for_update = ProjectProxy.update(project.id, data_for_update)
+                    data_for_update = self.proxy.update(project.id, data_for_update)
                     if data_for_update:
                         self.notify(f"Project updated {data_for_update.name}")
                         await self.list_view.clear()
@@ -74,7 +75,7 @@ class ProjectList(Screen):
     async def action_delete_project(self):
         if project := self.get_highlighted_project():
             if await self.app.push_screen_wait(Confirmation("Delete project?", {"d"})):
-                ProjectProxy.delete(project.id)
+                self.proxy.delete(project.id)
                 self.notify("Project deleted")
                 await self.list_view.clear()
                 await self._populate_list_view()

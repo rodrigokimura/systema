@@ -5,11 +5,12 @@ import textual.widgets
 from rich.console import RenderableType
 from textual.app import ComposeResult
 from textual.binding import Binding, BindingType
-from textual.widgets import Label, Static
+from textual.widgets import Checkbox, Label, Static
 from textual.widgets import ListView as _ListView
 from textual.widgets import Select as _Select
 
-from systema.server.project_manager.models.project import Project
+from systema.server.project_manager.models.item import ItemRead
+from systema.server.project_manager.models.project import ProjectRead
 
 
 class SelectOverlay(textual.widgets._select.SelectOverlay):
@@ -83,7 +84,7 @@ class ProjectItem(Static):
 
     def __init__(
         self,
-        project: Project,
+        project: ProjectRead,
         renderable: RenderableType = "",
         *,
         expand: bool = False,
@@ -109,3 +110,50 @@ class ProjectItem(Static):
     def compose(self) -> ComposeResult:
         yield Label(self.project.name, classes="name")
         yield Timestamp(self.project.created_at, classes="created_at")
+
+
+class Item(Static):
+    DEFAULT_CSS = """
+        Item {
+            layout: horizontal;
+            align: center middle;
+        }
+        Item Label.name {
+            margin: 1;
+        }
+        Item Timestamp.created_at {
+            color: $text-muted;
+            margin: 1;
+        }
+    """
+
+    def __init__(
+        self,
+        item: ItemRead,
+        renderable: RenderableType = "",
+        *,
+        expand: bool = False,
+        shrink: bool = False,
+        markup: bool = True,
+        name: str | None = None,
+        id: str | None = None,
+        classes: str | None = None,
+        disabled: bool = False,
+    ) -> None:
+        self.item = item
+        self.checkbox: Checkbox
+        super().__init__(
+            renderable,
+            expand=expand,
+            shrink=shrink,
+            markup=markup,
+            name=name,
+            id=id,
+            classes=classes,
+            disabled=disabled,
+        )
+
+    def compose(self) -> ComposeResult:
+        self.checkbox = Checkbox(self.item.name, value=self.item.is_done())
+        yield self.checkbox
+        yield Timestamp(self.item.created_at, classes="created_at")

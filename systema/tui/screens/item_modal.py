@@ -4,15 +4,11 @@ from textual.containers import Grid
 from textual.screen import ModalScreen
 from textual.widgets import Button, Input, Label
 
-from systema.server.project_manager.models.project import (
-    ProjectCreate,
-    ProjectRead,
-    ProjectUpdate,
-)
+from systema.server.project_manager.models.item import ItemCreate, ItemRead, ItemUpdate
 
 
-class ProjectModal(ModalScreen[ProjectCreate | ProjectUpdate]):
-    CSS_PATH = "styles/project-modal.css"
+class ItemModal(ModalScreen[ItemCreate | ItemUpdate]):
+    CSS_PATH = "styles/item-modal.css"
     BINDINGS = [
         ("enter", "submit", "Submit"),
         ("escape", "cancel", "Cancel"),
@@ -20,12 +16,12 @@ class ProjectModal(ModalScreen[ProjectCreate | ProjectUpdate]):
 
     def __init__(
         self,
-        project: ProjectRead | None = None,
+        item: ItemRead | None = None,
         name: str | None = None,
         id: str | None = None,
         classes: str | None = None,
     ) -> None:
-        self.project = project
+        self.item = item
         self.form_data = {}
         super().__init__(name, id, classes)
 
@@ -36,24 +32,32 @@ class ProjectModal(ModalScreen[ProjectCreate | ProjectUpdate]):
                 placeholder="Name",
                 id="name",
                 name="name",
-                value=self.project.name if self.project else "",
+                value=self.item.name if self.item else "",
             ),
+            # Input(
+            #     placeholder="Order",
+            #     id="order",
+            #     name="order",
+            #     value=str(self.item.order) if self.item else "0",
+            #     type="integer",
+            # ),
             Button("Cancel", "default", id="cancel"),
             Button("Submit", "primary", id="submit"),
         )
 
     def action_submit(self):
-        if self.project:
-            changed_data = ProjectUpdate(**self.form_data)
-            original_data = ProjectUpdate.model_validate(self.project)
+        if self.item:
+            changed_data = ItemUpdate(**self.form_data)
+            original_data = ItemUpdate.model_validate(self.item)
             if changed_data == original_data:
                 self.notify("Nothing to update")
                 self.dismiss()
                 return
             return_value = changed_data
         else:
-            return_value = ProjectCreate(
-                name=self.query(Input).filter("#name").only_one().value
+            return_value = ItemCreate(
+                name=self.query(Input).filter("#name").only_one().value,
+                order=0,
             )
         self.notify("Submitted")
         self.dismiss(return_value)

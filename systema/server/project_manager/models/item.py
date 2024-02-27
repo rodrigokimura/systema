@@ -1,11 +1,14 @@
 from __future__ import annotations
 
-from sqlmodel import Field, Session, select
+from typing import Literal
+
+from sqlmodel import Field, Session, col, select
 
 from systema.base import BaseModel
 from systema.server.db import engine
 from systema.server.project_manager.models.project import Project
 from systema.server.project_manager.models.task import (
+    Status,
     Task,
     TaskCreate,
     TaskRead,
@@ -21,27 +24,36 @@ class Item(ItemBase, table=True):
     id: str = Field(..., foreign_key="task.id", primary_key=True)
     order: int = Field(0, ge=0)
 
+    def _mode_down(self):
+        self.order -= 1
+
+    @classmethod
+    def _get_project(cls, session: Session, project_id: str):
+        if project := session.get(Project, project_id):
+            return project
+        raise Project.NotFound()
+
+    @classmethod
+    def _get_item_task(cls, session: Session, project: Project, id: str):
+        statement = (
+            select(Item, Task)
+            .join(Task)
+            .where(Task.project_id == project.id, Task.id == id)
+        )
+        if result := session.exec(statement).first():
+            return result
+        raise Item.NotFound()
+
     @classmethod
     def get(cls, project_id: str, id: str):
         with Session(engine) as session:
-            if not (project := session.get(Project, project_id)):
-                raise Project.NotFound()
-
-            statement = (
-                select(Item, Task)
-                .join(Task)
-                .where(Task.project_id == project.id, Task.id == id)
-            )
-            if result := session.exec(statement).first():
-                return result
-
-        raise Item.NotFound()
+            project = cls._get_project(session, project_id)
+            return cls._get_item_task(session, project, id)
 
     @classmethod
     def create(cls, data: ItemCreate, project_id: str):
         with Session(engine) as session:
-            if not (project := session.get(Project, project_id)):
-                raise Project.NotFound()
+            project = cls._get_project(session, project_id)
 
             task = Task.create(TaskCreate.model_validate(data), project_id)
 
@@ -56,26 +68,82 @@ class Item(ItemBase, table=True):
             return item, task
 
     @classmethod
+    def move(
+        cls, project_id: str, id: str, up_or_down: Literal["up"] | Literal["down"]
+    ):
+        with Session(engine) as session:
+            project = cls._get_project(session, project_id)
+            item, task = cls._get_item_task(session, project, id)
+
+            original_order = item.order
+
+            if up_or_down == "up":
+                item.order = max(0, item.order - 1)
+            elif up_or_down == "down":
+                statement = select(Item).order_by(col(Item.order).desc())
+                max_item = session.exec(statement).first()
+                max_order = max_item.order if max_item else 0
+                if item.order == max_order:
+                    return item, task
+
+                item.order += 1
+            else:
+                raise ValueError()
+
+            session.add(item)
+            session.commit()
+            session.refresh(item)
+
+            cls._reorder(
+                session,
+                project.id,
+                original_order,
+                exclude=item.id,
+                shift=False,
+            )
+            cls._reorder(
+                session,
+                project.id,
+                item.order,
+                exclude=item.id,
+                shift=True,
+            )
+
+            session.add(item)
+            session.commit()
+            session.refresh(item)
+            session.refresh(task)
+            return item, task
+
+    @classmethod
+    def check_or_uncheck(cls, project_id: str, id: str):
+        with Session(engine) as session:
+            project = cls._get_project(session, project_id)
+            item, task = cls._get_item_task(session, project, id)
+
+            if task.status == Status.DONE:
+                task.status = Status.NOT_STARTED
+            else:
+                task.status = Status.DONE
+
+            session.add(task)
+            session.commit()
+            session.refresh(item)
+            session.refresh(task)
+            return item, task
+
+    @classmethod
     def update(cls, project_id: str, id: str, data: ItemUpdate):
         with Session(engine) as session:
-            if not (project := session.get(Project, project_id)):
-                raise Project.NotFound()
+            project = cls._get_project(session, project_id)
+            item, task = cls._get_item_task(session, project, id)
 
-            statement = (
-                select(Item, Task)
-                .join(Task)
-                .where(Task.project_id == project.id, Task.id == id)
-            )
-            if not (result := session.exec(statement).first()):
-                raise Item.NotFound()
-            item, task = result
             original_order = item.order
 
             task.sqlmodel_update(data.model_dump(exclude_unset=True))
             item.sqlmodel_update(data.model_dump(exclude_unset=True))
 
-            session.add(item)
-            session.add(task)
+            session.add_all((item, task))
             session.commit()
 
             session.refresh(item)
@@ -105,17 +173,8 @@ class Item(ItemBase, table=True):
     @classmethod
     def delete(cls, project_id: str, id: str):
         with Session(engine) as session:
-            if not (project := session.get(Project, project_id)):
-                raise Project.NotFound()
-
-            statement = (
-                select(Item, Task)
-                .join(Task)
-                .where(Task.project_id == project.id, Task.id == id)
-            )
-            if not (result := session.exec(statement).first()):
-                raise Item.NotFound()
-            item, task = result
+            project = cls._get_project(session, project_id)
+            item, task = cls._get_item_task(session, project, id)
 
             cls._reorder(session, project_id, item.order, item.id, shift=False)
 
@@ -127,6 +186,7 @@ class Item(ItemBase, table=True):
     @classmethod
     def list(cls, project_id: str):
         with Session(engine) as session:
+            project = cls._get_project(session, project_id)
             statement = (
                 select(Item, Task)
                 .join(Task)
@@ -134,9 +194,9 @@ class Item(ItemBase, table=True):
                 .where(
                     Item.id == Task.id,
                     Task.project_id == Project.id,
-                    Project.id == project_id,
+                    Project.id == project.id,
                 )
-                .order_by("order")
+                .order_by(col(Item.order).asc())
             )
             return session.exec(statement).all()
 
@@ -158,7 +218,7 @@ class Item(ItemBase, table=True):
                 Item.order >= order,
                 Item.id != exclude,
             )
-            .order_by("order")
+            .order_by(col(Item.order).asc())
         )
         items = session.exec(statement).all()
         for i, item in enumerate(items):
