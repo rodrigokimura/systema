@@ -136,9 +136,7 @@ class Item(Static):
 
         async with self.batch():
             self.checkbox.remove()
-            self.checkbox = Checkbox(
-                item.name + "-" + str(item.order), value=item.is_done()
-            )
+            self.checkbox = Checkbox(item.name, value=item.is_done())
 
             self.timestamp.remove()
             self.timestamp = Timestamp()
