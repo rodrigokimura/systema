@@ -27,7 +27,7 @@ class ItemModal(ModalScreen[ItemCreate | ItemUpdate]):
 
     def compose(self) -> ComposeResult:
         yield Grid(
-            Label("Project"),
+            Label("Item"),
             Input(
                 placeholder="Name",
                 id="name",
