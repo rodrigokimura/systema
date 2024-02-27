@@ -7,8 +7,8 @@ repos:
       - id: check-yaml
       - id: sort-simple-yaml
       - id: forbid-submodules
-      # - id: no-commit-to-branch
-      #   args: [--branch, master]
+      - id: no-commit-to-branch
+        args: [--branch, master]
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.2.1
     hooks:
