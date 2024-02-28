@@ -7,45 +7,33 @@ from textual.binding import Binding
 from textual.containers import Vertical
 from textual.css.query import NoMatches
 from textual.reactive import var
-from textual.screen import Screen
 from textual.widgets import Collapsible, Footer, Header, ListItem
 
 from systema.server.project_manager.models.item import ItemCreate, ItemUpdate
-from systema.server.project_manager.models.project import ProjectRead
 from systema.server.project_manager.models.task import Status
 from systema.tui.proxy import ItemProxy
+from systema.tui.screens.base import ProjectScreen
 from systema.tui.screens.confirmation import Confirmation
 from systema.tui.screens.item_modal import ItemModal
 from systema.tui.widgets import Item, ListView
 
 
-class ListMain(Screen):
+class ListScreen(ProjectScreen):
     BINDINGS = [
-        Binding("q,escape", "dismiss", "Dismiss"),
-        Binding("up,k", "focus_previous", "Focus previous", show=False),
-        Binding("down,j", "focus_next", "Focus next", show=False),
-        Binding("a", "add_item", "Add item", show=True),
-        Binding("e", "edit_item", "Edit item", show=True),
-        Binding("d", "delete_item", "Delete item", show=True),
-        Binding("ctrl+down,ctrl+j", "move_down", "Move item down", show=True),
-        Binding("ctrl+up,ctrl+k", "move_up", "Move item up", show=True),
-        Binding("space,enter", "toggle_item", "Toggle item", show=True),
-        Binding("t", "toggle_collapsible", "Toggle collapsible", show=True),
+        Binding("q,escape", "dismiss", "Quit"),
+        Binding("a", "add_item", "Add", show=True),
+        Binding("e", "edit_item", "Edit", show=True),
+        Binding("d", "delete_item", "Delete", show=True),
+        Binding("ctrl+down,ctrl+j", "move_down", "Move down", show=True),
+        Binding("ctrl+up,ctrl+k", "move_up", "Move up", show=True),
+        Binding("space,enter", "toggle_item", "Check/Uncheck", show=True),
+        Binding("t", "toggle_collapsible", "Show/Hide completed", show=True),
+        Binding("m", "select_mode", "Select mode", show=True),
     ]
     CSS_PATH = "styles/list-main.css"
-    current_item: var[Item]
 
-    def __init__(
-        self,
-        project: ProjectRead | None = None,
-        name: str | None = None,
-        id: str | None = None,
-        classes: str | None = None,
-    ) -> None:
-        self.project = project
-        if self.project:
-            self.proxy = ItemProxy(self.project.id)
-        super().__init__(name, id, classes)
+    current_item: var[Item | None] = var(None)
+    proxy: ItemProxy
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -58,9 +46,6 @@ class ListMain(Screen):
             yield self.collapsible
         yield Footer()
 
-    async def on_mount(self):
-        await self._populate_list_view()
-
     @asynccontextmanager
     async def repopulate(self):
         focus_checked = self.checked_items.has_focus
@@ -68,16 +53,19 @@ class ListMain(Screen):
         checked_idx = self.checked_items.index
         unchecked_idx = self.unchecked_items.index
         async with self.batch():
-            await self.unchecked_items.clear()
-            await self.checked_items.clear()
-            await self._populate_list_view()
+            await self.clear()
+            await self.populate()
             if focus_checked:
                 self.checked_items.index = checked_idx
             if focus_unchecked:
                 self.unchecked_items.index = unchecked_idx
             yield
 
-    async def _populate_list_view(self):
+    async def clear(self):
+        await self.unchecked_items.clear()
+        await self.checked_items.clear()
+
+    async def populate(self):
         for item in self.proxy.all():
             i = Item()
             i.item = item
@@ -88,6 +76,8 @@ class ListMain(Screen):
 
     def get_highlighted_item(self):
         item = self.current_item
+        if item is None:
+            raise ValueError()
         item_read = item.item
         if item_read is None:
             raise ValueError()

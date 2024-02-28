@@ -1,0 +1,19 @@
+ModeModal {
+  align: center middle;
+}
+
+ModeModal > Vertical {
+  height: auto;
+  max-width: 20;
+  border: round white 50%;
+}
+
+ModeModal Label {
+  align: center middle;
+  content-align: center middle;
+}
+
+ModeModal Button {
+  width: 100%;
+  margin: 1;
+}

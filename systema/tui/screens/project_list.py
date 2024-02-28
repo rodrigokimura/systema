@@ -20,16 +20,17 @@ from systema.tui.widgets import ListView, ProjectItem
 
 class ProjectList(Screen):
     BINDINGS = [
-        Binding("q", "dismiss", "Dismiss"),
-        Binding("escape", "dismiss", "Dismiss"),
-        Binding("a", "add_project", "Add project"),
-        Binding("e", "edit_project", "Edit project"),
-        Binding("d", "delete_project", "Delete project"),
+        Binding("q,escape", "dismiss", "Quit", show=True),
+        Binding("a", "add_project", "Add", show=True),
+        Binding("e", "edit_project", "Edit", show=True),
+        Binding("d", "delete_project", "Delete", show=True),
     ]
     CSS_PATH = "styles/project-list.css"
 
     class Selected(Message):
-        project: ProjectRead
+        def __init__(self, project: ProjectRead) -> None:
+            super().__init__()
+            self.project = project
 
     def compose(self) -> ComposeResult:
         self.proxy = ProjectProxy()
@@ -98,6 +99,6 @@ class ProjectList(Screen):
     def handle_item_selected(self, message: ListView.Selected):
         project = message.item.query_one(ProjectItem).project
         if project:
-            new_message = self.Selected()
+            new_message = self.Selected(project)
             new_message.project = project
             self.post_message(new_message)
