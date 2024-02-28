@@ -1,8 +1,10 @@
 from contextlib import asynccontextmanager
+from typing import Literal
 
 from textual import on, work
 from textual.app import ComposeResult
 from textual.binding import Binding
+from textual.containers import Vertical
 from textual.css.query import NoMatches
 from textual.reactive import var
 from textual.screen import Screen
@@ -47,12 +49,13 @@ class ListMain(Screen):
 
     def compose(self) -> ComposeResult:
         yield Header()
-        if self.project:
-            self.unchecked_items = ListView()
-            self.checked_items = ListView()
-            yield self.unchecked_items
-        self.collapsible = Collapsible(self.checked_items, title="Completed items")
-        yield self.collapsible
+        with Vertical():
+            if self.project:
+                self.unchecked_items = ListView()
+                self.checked_items = ListView()
+                yield self.unchecked_items
+            self.collapsible = Collapsible(self.checked_items, title="Completed items")
+            yield self.collapsible
         yield Footer()
 
     async def on_mount(self):
@@ -121,24 +124,23 @@ class ListMain(Screen):
                 self.unchecked_items.index = current_index
 
     async def action_move_down(self):
-        if self.checked_items.has_focus:
-            return
-        _, item_read = self.get_highlighted_item()
-        current_index = self.unchecked_items.index
-        self.proxy.move(item_read.id, "down")
-        async with self.repopulate():
-            if current_index is not None:
-                self.unchecked_items.index = current_index + 1
+        await self._move("down")
 
     async def action_move_up(self):
+        await self._move("up")
+
+    async def _move(self, up_or_down: Literal["up"] | Literal["down"]):
         if self.checked_items.has_focus:
             return
         _, item_read = self.get_highlighted_item()
         current_index = self.unchecked_items.index
-        self.proxy.move(item_read.id, "up")
+        self.proxy.move(item_read.id, up_or_down)
         async with self.repopulate():
             if current_index is not None:
-                self.unchecked_items.index = current_index - 1
+                if up_or_down == "up":
+                    self.unchecked_items.index = current_index - 1
+                elif up_or_down == "down":
+                    self.unchecked_items.index = current_index + 1
 
     async def action_toggle_item(self):
         item, _ = self.get_highlighted_item()

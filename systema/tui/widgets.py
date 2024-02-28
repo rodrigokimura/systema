@@ -109,7 +109,7 @@ class Item(Static):
     DEFAULT_CSS = """
         Item {
             layout: horizontal;
-            align: center middle;
+            align: left middle;
         }
         Item Label {
             margin: 1;

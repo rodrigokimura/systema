@@ -1,0 +1,25 @@
+ListMain {
+  align: center middle;
+}
+ListMain > Vertical {
+  width: 80vw;
+  overflow-y: auto;
+  border: round $primary;
+  margin: 1;
+}
+
+ListMain ListView {
+  width: 100%;
+  height: auto;
+}
+
+ListMain Collapsible {
+  padding-left: 0;
+}
+
+ListMain Collapsible > Contents {
+  width: 100%;
+  height: auto;
+  padding: 0;
+  margin: 0;
+}

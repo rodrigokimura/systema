@@ -22,7 +22,7 @@ class ProjectList(Screen):
     BINDINGS = [
         Binding("q", "dismiss", "Dismiss"),
         Binding("escape", "dismiss", "Dismiss"),
-        Binding("p", "add_project", "Add project"),
+        Binding("a", "add_project", "Add project"),
         Binding("e", "edit_project", "Edit project"),
         Binding("d", "delete_project", "Delete project"),
     ]
