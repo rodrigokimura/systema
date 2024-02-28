@@ -23,6 +23,7 @@ class SystemaTUIApp(App):
         "projects": ProjectList(),
         "project": ProjectMain(),
     }
+    CSS_PATH = "style.css"
 
     def on_mount(self):
         self.push_screen("dashboard")
