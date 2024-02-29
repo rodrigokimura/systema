@@ -1,5 +1,6 @@
 from textual import on
 from textual.app import ComposeResult
+from textual.binding import Binding
 from textual.containers import Grid
 from textual.screen import ModalScreen
 from textual.widgets import Button, Input, Label
@@ -14,8 +15,8 @@ from systema.server.project_manager.models.project import (
 class ProjectModal(ModalScreen[ProjectCreate | ProjectUpdate]):
     CSS_PATH = "styles/project-modal.css"
     BINDINGS = [
-        ("enter", "submit", "Submit"),
-        ("escape", "cancel", "Cancel"),
+        Binding("enter", "submit", "Submit", show=False),
+        Binding("escape", "cancel", "Cancel", show=False),
     ]
 
     def __init__(
