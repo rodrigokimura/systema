@@ -1,14 +1,13 @@
 Dashboard {
   align: center middle;
-}
 
-Dashboard .buttons {
-  align: center middle;
-  margin: 1;
-  border: round $primary;
-  width: 80%;
-}
+  & Vertical {
+    align: center middle;
+    margin: 1;
+    border: round $primary;
 
-Dashboard Button {
-  margin: 1;
+    & Button {
+      margin: 1;
+    }
+  }
 }
