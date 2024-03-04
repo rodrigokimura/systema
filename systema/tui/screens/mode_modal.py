@@ -8,7 +8,7 @@ from textual.message import Message
 from textual.screen import ModalScreen
 from textual.widgets import Button, Label
 
-from systema.tui.screens.list_main import ListScreen
+from systema.tui.screens.list import ListScreen
 
 
 class Mode(str, enum.Enum):
