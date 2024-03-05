@@ -30,7 +30,7 @@ class ListScreen(ProjectScreen):
         Binding("t", "toggle_collapsible", "Show/Hide completed", show=True),
         Binding("m", "select_mode", "Select mode", show=True),
     ]
-    CSS_PATH = "styles/list-main.css"
+    CSS_PATH = "styles/list.css"
 
     current_item: var[Item | None] = var(None)
     proxy: ItemProxy

@@ -1,0 +1,28 @@
+ListScreen {
+  align: center middle;
+
+  & > Vertical {
+    width: 100%;
+    border: round $primary;
+    margin: 1;
+    overflow-y: auto;
+
+    & ListView {
+      width: 100%;
+      height: auto;
+      overflow-y: auto;
+    }
+
+    & Collapsible {
+      padding-left: 0;
+
+      & > Contents {
+        width: 100%;
+        height: auto;
+        padding: 0;
+        margin: 0;
+        overflow-y: auto;
+      }
+    }
+  }
+}

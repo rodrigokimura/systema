@@ -7,7 +7,7 @@ from systema.server.project_manager.models.project import ProjectRead
 from systema.tui.proxy import ItemProxy
 from systema.tui.screens.base import ProjectScreen
 from systema.tui.screens.dashboard import Dashboard
-from systema.tui.screens.list_main import ListScreen
+from systema.tui.screens.list import ListScreen
 from systema.tui.screens.mode_modal import Mode, ModeModal
 from systema.tui.screens.project_list import ProjectList
 

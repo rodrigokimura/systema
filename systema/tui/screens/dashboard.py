@@ -14,14 +14,15 @@ class Dashboard(Screen[None]):
     CSS_PATH = "styles/dashboard.css"
 
     def compose(self) -> ComposeResult:
-        users = Button("Users")
-        projects = Button("Projects")
-        config = Button("Config")
         self.buttons_and_actions = {
-            projects: self.action_projects,
+            Button("Projects"): self.action_projects,
+            Button("Users"): None,
+            Button("Config"): None,
         }
         yield Header()
-        yield Vertical(users, projects, config, classes="buttons")
+        with Vertical():
+            for button in self.buttons_and_actions:
+                yield button
         yield Footer()
 
     def action_projects(self):
