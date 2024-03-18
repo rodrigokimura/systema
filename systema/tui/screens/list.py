@@ -46,6 +46,9 @@ class ListScreen(ProjectScreen):
             yield self.collapsible
         yield Footer()
 
+    async def on_mount(self):
+        await super().on_mount()
+
     @asynccontextmanager
     async def repopulate(self):
         focus_checked = self.checked_items.has_focus
@@ -145,9 +148,10 @@ class ListScreen(ProjectScreen):
 
     @on(ListView.Highlighted)
     async def handle_listview_highlighted(self, message: ListView.Highlighted):
-        if message.item:
+        if item := message.item:
+            item.scroll_visible()
             try:
-                self.current_item = message.item.query_one(Item)
+                self.current_item = item.query_one(Item)
             except NoMatches:
                 pass
 

@@ -45,6 +45,7 @@ def tui(
 ):
     """Start TUI client"""
 
+    print(dev)
     if remote:
         raise NotImplementedError("Sorry! Not available yet.")
 

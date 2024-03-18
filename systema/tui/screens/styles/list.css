@@ -10,18 +10,19 @@ ListScreen {
     & ListView {
       width: 100%;
       height: auto;
-      overflow-y: auto;
+      overflow-y: hidden;
     }
 
     & Collapsible {
       padding-left: 0;
+      overflow-y: hidden;
 
       & > Contents {
         width: 100%;
         height: auto;
         padding: 0;
         margin: 0;
-        overflow-y: auto;
+        overflow-y: hidden;
       }
     }
   }

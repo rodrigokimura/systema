@@ -19,9 +19,8 @@ router = APIRouter(
 
 @router.post("/", response_model=TaskRead, status_code=status.HTTP_201_CREATED)
 async def create_task(project_id: str, task: TaskCreate):
-    if db_task := Task.create(task, project_id):
-        return db_task
-    raise HTTPException(status.HTTP_404_NOT_FOUND, "Task not found")
+    db_task, _ = Task.create(task, project_id)
+    return db_task
 
 
 @router.get("/", response_model=list[TaskRead])

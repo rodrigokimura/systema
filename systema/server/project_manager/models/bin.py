@@ -41,6 +41,11 @@ class Bin(BinBase, IdMixin, table=True):
         raise Board.NotFound
 
     @classmethod
+    def get(cls, board_id: str, id: str):
+        with Session(engine) as session:
+            return cls._get(session, board_id, id)
+
+    @classmethod
     def create(cls, data: BinCreate, board_id: str):
         with Session(engine) as session:
             project = cls._get_board(session, board_id)
@@ -188,5 +193,10 @@ class Bin(BinBase, IdMixin, table=True):
         session.commit()
 
 
-class BinRead(Bin):
-    pass
+class BinRead(BinBase):
+    board_id: str
+    created_at: datetime
+
+    @classmethod
+    def from_bin(cls, bin: Bin):
+        return BinRead.model_validate(bin)

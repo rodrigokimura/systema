@@ -49,8 +49,7 @@ class ItemModal(ModalScreen[ItemCreate | ItemUpdate]):
             return_value = changed_data
         else:
             return_value = ItemCreate(
-                name=self.query(Input).filter("#name").only_one().value,
-                order=0,
+                name=self.query(Input).filter("#name").only_one().value
             )
         self.dismiss(return_value)
         self.clear()
@@ -69,7 +68,7 @@ class ItemModal(ModalScreen[ItemCreate | ItemUpdate]):
         self.form_data[message.input.name] = message.value
 
     @on(Input.Submitted)
-    def handle_input_submitted(self, message: Input.Submitted):
+    def handle_input_submitted(self, _: Input.Submitted):
         self.action_submit()
 
     @on(Button.Pressed)

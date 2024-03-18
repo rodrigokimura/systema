@@ -250,7 +250,7 @@ class ItemCreate(TaskCreate):
     pass
 
 
-class ItemRead(Item, TaskRead):
+class ItemRead(TaskRead, ItemBase):
     @classmethod
     def from_task(cls, item: Item, task: Task):
         return ItemRead.model_validate(item, update=task.model_dump())
