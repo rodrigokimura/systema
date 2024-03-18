@@ -24,9 +24,6 @@ class Item(ItemBase, table=True):
     id: str = Field(..., foreign_key="task.id", primary_key=True)
     order: int = Field(0, ge=0)
 
-    def _mode_down(self):
-        self.order -= 1
-
     @classmethod
     def _get_project(cls, session: Session, project_id: str):
         if project := session.get(Project, project_id):
@@ -52,20 +49,24 @@ class Item(ItemBase, table=True):
 
     @classmethod
     def create(cls, data: ItemCreate, project_id: str):
-        with Session(engine) as session:
-            project = cls._get_project(session, project_id)
+        task, subclass_instances = Task.create(
+            TaskCreate.model_validate(data), project_id
+        )
+        item = subclass_instances[0]
+        return item, task
 
-            task = Task.create(TaskCreate.model_validate(data), project_id)
+    @classmethod
+    def _create(cls, session: Session, task: Task):
+        session.refresh(task)
+        item = Item.model_validate(task)
+        session.add(item)
+        session.commit()
+        session.refresh(item)
 
-            item = Item.model_validate(data, update={"id": task.id})
-            session.add(item)
-            session.commit()
-            session.refresh(item)
+        cls._reorder(session, task.project_id, item.order, exclude=item.id, shift=True)
 
-            cls._reorder(session, project.id, item.order, exclude=item.id, shift=True)
-
-            session.refresh(item)
-            return item, task
+        session.refresh(item)
+        return item
 
     @classmethod
     def move(
@@ -245,8 +246,8 @@ class Item(ItemBase, table=True):
         session.commit()
 
 
-class ItemCreate(ItemBase, TaskCreate):
-    ...
+class ItemCreate(TaskCreate):
+    pass
 
 
 class ItemRead(Item, TaskRead):
@@ -256,4 +257,4 @@ class ItemRead(Item, TaskRead):
 
 
 class ItemUpdate(ItemBase, TaskUpdate):
-    ...
+    pass

@@ -6,6 +6,7 @@ from sqlmodel import Field, Session, select
 
 from systema.base import BaseModel, IdMixin
 from systema.server.db import engine
+from systema.server.project_manager.models.board import Board
 from systema.server.project_manager.models.list import List
 
 
@@ -39,8 +40,13 @@ class Project(ProjectBase, IdMixin, table=True):
             session.refresh(project)
 
             list_ = List(id=project.id)
-            session.add(list_)
+            board = Board(id=project.id)
+
+            session.add_all((list_, board))
             session.commit()
+
+            session.refresh(board)
+            board.create_default_bins(session)
 
             session.refresh(project)
             return project
@@ -63,17 +69,18 @@ class Project(ProjectBase, IdMixin, table=True):
         with Session(engine) as session:
             if project := session.get(Project, id):
                 session.delete(project)
+                if list_ := session.get(List, id):
+                    session.delete(list_)
+                if board := session.get(Board, id):
+                    session.delete(board)
                 session.commit()
-                if list := session.get(List, id):
-                    session.delete(list)
-                    session.commit()
                 return
 
             raise cls.NotFound()
 
 
 class ProjectCreate(ProjectBase):
-    ...
+    pass
 
 
 class ProjectRead(ProjectBase):

@@ -45,13 +45,23 @@ class Task(TaskBase, IdMixin, table=True):
                 db_task = Task(name=data.name, project_id=project.id)
                 session.add(db_task)
                 session.commit()
+
+                subclass_instances = cls.create_subclass_instances(session, db_task)
+
                 session.refresh(db_task)
-                return db_task
+                return db_task, subclass_instances
             raise Project.NotFound()
+
+    @classmethod
+    def create_subclass_instances(cls, session: Session, task: Task):
+        from systema.server.project_manager.models.item import Item
+
+        item = Item._create(session, task)
+        return (item,)
 
 
 class TaskCreate(TaskBase):
-    ...
+    pass
 
 
 class TaskRead(TaskBase):
