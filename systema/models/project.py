@@ -5,9 +5,9 @@ from datetime import datetime
 from sqlmodel import Field, Session, select
 
 from systema.base import BaseModel, IdMixin
+from systema.models.board import Board
+from systema.models.checklist import Checklist
 from systema.server.db import engine
-from systema.server.project_manager.models.board import Board
-from systema.server.project_manager.models.list import List
 
 
 class ProjectBase(BaseModel):
@@ -39,7 +39,7 @@ class Project(ProjectBase, IdMixin, table=True):
             session.commit()
             session.refresh(project)
 
-            list_ = List(id=project.id)
+            list_ = Checklist(id=project.id)
             board = Board(id=project.id)
 
             session.add_all((list_, board))
@@ -69,7 +69,7 @@ class Project(ProjectBase, IdMixin, table=True):
         with Session(engine) as session:
             if project := session.get(Project, id):
                 session.delete(project)
-                if list_ := session.get(List, id):
+                if list_ := session.get(Checklist, id):
                     session.delete(list_)
                 if board := session.get(Board, id):
                     session.delete(board)

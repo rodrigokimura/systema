@@ -12,8 +12,8 @@ from textual.widgets import Checkbox, Label, Static
 from textual.widgets import ListView as _ListView
 from textual.widgets import Select as _Select
 
-from systema.server.project_manager.models.item import ItemRead
-from systema.server.project_manager.models.project import ProjectRead
+from systema.models.item import ItemRead
+from systema.models.project import ProjectRead
 
 
 class SelectOverlay(textual.widgets._select.SelectOverlay):

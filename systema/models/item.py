@@ -5,15 +5,15 @@ from typing import Literal
 from sqlmodel import Field, Session, col, select
 
 from systema.base import BaseModel
-from systema.server.db import engine
-from systema.server.project_manager.models.project import Project
-from systema.server.project_manager.models.task import (
+from systema.models.project import Project
+from systema.models.task import (
     Status,
     Task,
     TaskCreate,
     TaskRead,
     TaskUpdate,
 )
+from systema.server.db import engine
 
 
 class ItemBase(BaseModel):

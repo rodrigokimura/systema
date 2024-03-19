@@ -1,13 +1,13 @@
 from abc import ABC, abstractmethod
 from typing import Any, Generic, Literal, Sequence, TypeVar
 
-from systema.server.project_manager.models.item import (
+from systema.models.item import (
     Item,
     ItemCreate,
     ItemRead,
     ItemUpdate,
 )
-from systema.server.project_manager.models.project import (
+from systema.models.project import (
     Project,
     ProjectCreate,
     ProjectRead,

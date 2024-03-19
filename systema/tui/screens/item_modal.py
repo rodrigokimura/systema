@@ -4,7 +4,7 @@ from textual.containers import Grid
 from textual.screen import ModalScreen
 from textual.widgets import Button, Input, Label
 
-from systema.server.project_manager.models.item import ItemCreate, ItemRead, ItemUpdate
+from systema.models.item import ItemCreate, ItemRead, ItemUpdate
 
 
 class ItemModal(ModalScreen[ItemCreate | ItemUpdate]):

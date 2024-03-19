@@ -5,7 +5,7 @@ from textual.app import ScreenStackError
 from textual.reactive import var
 from textual.screen import Screen
 
-from systema.server.project_manager.models.project import ProjectRead
+from systema.models.project import ProjectRead
 from systema.tui.proxy import Proxy
 
 

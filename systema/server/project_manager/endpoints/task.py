@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 
-from systema.server.auth.utils import get_current_active_user
-from systema.server.db import engine
-from systema.server.project_manager.models.task import (
+from systema.models.task import (
     Task,
     TaskCreate,
     TaskRead,
     TaskUpdate,
 )
+from systema.server.auth.utils import get_current_active_user
+from systema.server.db import engine
 
 router = APIRouter(
     prefix="/projects/{project_id}/tasks",

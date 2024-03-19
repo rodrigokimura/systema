@@ -3,16 +3,18 @@ from textual.app import App, UnknownModeError
 from textual.binding import Binding
 from textual.reactive import var
 
-from systema.server.project_manager.models.project import ProjectRead
+from systema.models.project import ProjectRead
 from systema.tui.proxy import ItemProxy
 from systema.tui.screens.base import ProjectScreen
+from systema.tui.screens.checklist import ListScreen
 from systema.tui.screens.dashboard import Dashboard
-from systema.tui.screens.list import ListScreen
+from systema.tui.screens.kanban import KanbanScreen
 from systema.tui.screens.mode_modal import Mode, ModeModal
 from systema.tui.screens.project_list import ProjectList
 
 PROJECT_SCREENS: dict[Mode, ProjectScreen] = {
-    Mode.LIST: ListScreen(ItemProxy),
+    Mode.CHECKLIST: ListScreen(ItemProxy),
+    Mode.KANBAN: KanbanScreen(ItemProxy),
 }
 
 

@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends, status
 
-from systema.server.auth.utils import get_current_active_user
-from systema.server.project_manager.models.item import (
+from systema.models.item import (
     Item,
     ItemCreate,
     ItemRead,
     ItemUpdate,
 )
+from systema.server.auth.utils import get_current_active_user
 
 router = APIRouter(
     prefix="/projects/{project_id}/items",

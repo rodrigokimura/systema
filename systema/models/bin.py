@@ -34,7 +34,7 @@ class Bin(BinBase, IdMixin, table=True):
 
     @classmethod
     def _get_board(cls, session: Session, board_id: str):
-        from systema.server.project_manager.models.board import Board
+        from systema.models.board import Board
 
         if board := session.get(Board, board_id):
             return board

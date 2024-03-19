@@ -9,8 +9,8 @@ from textual.css.query import NoMatches
 from textual.reactive import var
 from textual.widgets import Collapsible, Footer, Header, ListItem
 
-from systema.server.project_manager.models.item import ItemCreate, ItemUpdate
-from systema.server.project_manager.models.task import Status
+from systema.models.item import ItemCreate, ItemUpdate
+from systema.models.task import Status
 from systema.tui.proxy import ItemProxy
 from systema.tui.screens.base import ProjectScreen
 from systema.tui.screens.confirmation import Confirmation
@@ -45,9 +45,6 @@ class ListScreen(ProjectScreen):
             self.collapsible = Collapsible(self.checked_items, title="Completed items")
             yield self.collapsible
         yield Footer()
-
-    async def on_mount(self):
-        await super().on_mount()
 
     @asynccontextmanager
     async def repopulate(self):

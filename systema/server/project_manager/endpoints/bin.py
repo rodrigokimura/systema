@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status
 
+from systema.models.bin import Bin, BinCreate, BinRead, BinUpdate
 from systema.server.auth.utils import get_current_active_user
-from systema.server.project_manager.models.bin import Bin, BinCreate, BinRead, BinUpdate
 
 router = APIRouter(
     prefix="/projects/{project_id}/bins",

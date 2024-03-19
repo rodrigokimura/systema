@@ -6,8 +6,8 @@ from datetime import datetime
 from sqlmodel import Field, Session, select
 
 from systema.base import BaseModel, IdMixin
+from systema.models.project import Project
 from systema.server.db import engine
-from systema.server.project_manager.models.project import Project
 
 
 class Status(enum.Enum):
@@ -54,7 +54,7 @@ class Task(TaskBase, IdMixin, table=True):
 
     @classmethod
     def create_subclass_instances(cls, session: Session, task: Task):
-        from systema.server.project_manager.models.item import Item
+        from systema.models.item import Item
 
         item = Item._create(session, task)
         return (item,)

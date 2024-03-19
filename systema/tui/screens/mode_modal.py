@@ -8,19 +8,12 @@ from textual.message import Message
 from textual.screen import ModalScreen
 from textual.widgets import Button, Label
 
-from systema.tui.screens.list import ListScreen
-
 
 class Mode(str, enum.Enum):
-    LIST = "list"
+    CHECKLIST = "list"
     KANBAN = "kanban"
     TIMELINE = "timeline"
     CALENDAR = "calendar"
-
-
-SCREEN_TYPES_BY_MODE = {
-    Mode.LIST: ListScreen,
-}
 
 
 class ModeModal(ModalScreen[Mode]):
