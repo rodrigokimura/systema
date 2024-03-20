@@ -14,7 +14,7 @@ class BaseModel(_SQLModel):
     """Custom plural"""
 
     class NotFound(Exception):
-        ...
+        """When query returns no result"""
 
     @classmethod
     def get_singular_name(cls):

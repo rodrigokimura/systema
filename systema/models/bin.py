@@ -43,7 +43,7 @@ class Bin(BinBase, IdMixin, table=True):
     @classmethod
     def get(cls, board_id: str, id: str):
         with Session(engine) as session:
-            return cls._get(session, board_id, id)
+            return BinRead.from_bin(cls._get(session, board_id, id))
 
     @classmethod
     def create(cls, data: BinCreate, board_id: str):
@@ -55,7 +55,7 @@ class Bin(BinBase, IdMixin, table=True):
             session.refresh(bin)
             cls._reorder(session, bin.board_id, bin.order, exclude=bin.id, shift=True)
             session.refresh(bin)
-            return bin
+            return BinRead.from_bin(bin)
 
     @classmethod
     def move(
@@ -137,7 +137,7 @@ class Bin(BinBase, IdMixin, table=True):
 
             session.refresh(bin)
 
-            return bin
+            return BinRead.from_bin(bin)
 
     @classmethod
     def delete(cls, board_id: str, id: str):
@@ -164,7 +164,7 @@ class Bin(BinBase, IdMixin, table=True):
                     col(Bin.order).asc(),
                 )
             )
-            return session.exec(statement).all()
+            return (BinRead.from_bin(row) for row in session.exec(statement).all())
 
     @classmethod
     def _reorder(

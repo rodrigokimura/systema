@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 
 import textual.widgets
+from rich.console import RenderableType
 from textual import on
 from textual.app import ComposeResult
 from textual.binding import Binding
@@ -151,3 +152,29 @@ class Item(Static):
             new_message = self.Changed()
             new_message.item = self.item
             self.post_message(new_message)
+
+
+class Bin(Static):
+    def __init__(
+        self,
+        renderable: RenderableType = "",
+        *,
+        expand: bool = False,
+        shrink: bool = False,
+        markup: bool = True,
+        name: str | None = None,
+        id: str | None = None,
+        classes: str | None = None,
+        disabled: bool = False,
+    ) -> None:
+        super().__init__(
+            renderable,
+            expand=expand,
+            shrink=shrink,
+            markup=markup,
+            name=name,
+            id=id,
+            classes=classes,
+            disabled=disabled,
+        )
+        self.can_focus = True

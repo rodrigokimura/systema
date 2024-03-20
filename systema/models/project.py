@@ -21,7 +21,9 @@ class Project(ProjectBase, IdMixin, table=True):
     def list(cls):
         with Session(engine) as session:
             statement = select(cls)
-            return session.exec(statement).all()
+            return (
+                ProjectRead.model_validate(row) for row in session.exec(statement).all()
+            )
 
     @classmethod
     def get(cls, id: str):
@@ -49,7 +51,7 @@ class Project(ProjectBase, IdMixin, table=True):
             board.create_default_bins(session)
 
             session.refresh(project)
-            return project
+            return ProjectRead.model_validate(project)
 
     @classmethod
     def update(cls, id: str, data: ProjectUpdate):
@@ -60,7 +62,7 @@ class Project(ProjectBase, IdMixin, table=True):
                 session.commit()
 
                 session.refresh(db_project)
-                return db_project
+                return ProjectRead.model_validate(db_project)
 
             raise cls.NotFound()
 

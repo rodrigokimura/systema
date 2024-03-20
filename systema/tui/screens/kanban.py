@@ -4,8 +4,10 @@ from textual.containers import HorizontalScroll
 from textual.reactive import var
 from textual.widgets import Footer, Header, Label
 
-from systema.tui.proxy import ItemProxy
+from systema.models.project import ProjectRead
+from systema.tui.proxy import BinProxy, CardProxy
 from systema.tui.screens.base import ProjectScreen
+from systema.tui.widgets import Bin as BinWidget
 from systema.tui.widgets import Item
 
 
@@ -21,19 +23,37 @@ class KanbanScreen(ProjectScreen):
         # Binding("t", "toggle_collapsible", "Show/Hide completed", show=True),
         Binding("m", "select_mode", "Select mode", show=True),
     ]
-    CSS_PATH = "styles/list.css"
+    CSS_PATH = "styles/kanban.css"
 
     current_item: var[Item | None] = var(None)
-    proxy: ItemProxy
+    proxy: CardProxy
+    bin_proxy: BinProxy
+
+    async def watch_project(self, project: ProjectRead | None):
+        if project:
+            self.bin_proxy = BinProxy(project.id)
+        await super().watch_project(project)
 
     def compose(self) -> ComposeResult:
         yield Header()
-        with HorizontalScroll():
-            yield Label("test")
+        self.cont = HorizontalScroll()
+        yield self.cont
         yield Footer()
 
     async def clear(self):
-        pass
+        async with self.batch():
+            for w in self.cont.query(Label):
+                w.remove()
 
     async def populate(self):
-        pass
+        cards = list(self.proxy.all())
+        print("asdfasdf")
+        print(cards)
+        bin = BinWidget()
+        bin.border_title = "No bin"
+        self.cont.mount(bin)
+
+        for b in self.bin_proxy.all():
+            bin = BinWidget()
+            bin.border_title = b.name
+            self.cont.mount(bin)

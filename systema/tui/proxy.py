@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import Any, Generic, Literal, Sequence, TypeVar
+from typing import Any, Generator, Generic, Literal, TypeVar
 
+from systema.models.bin import Bin, BinCreate, BinRead, BinUpdate
+from systema.models.card import Card, CardCreate, CardRead, CardUpdate
 from systema.models.item import (
     Item,
     ItemCreate,
@@ -19,7 +21,7 @@ T = TypeVar("T")
 
 class Proxy(ABC, Generic[T]):
     @abstractmethod
-    def all(self) -> Sequence[T]:
+    def all(self) -> Generator[T, None, None]:
         pass
 
     @abstractmethod
@@ -37,13 +39,13 @@ class Proxy(ABC, Generic[T]):
 
 class ProjectProxy(Proxy[ProjectRead]):
     def all(self):
-        return [ProjectRead.model_validate(p) for p in Project.list()]
+        return Project.list()
 
     def create(self, data: ProjectCreate):
-        return ProjectRead.model_validate(Project.create(data))
+        return Project.create(data)
 
     def update(self, id: str, data: ProjectUpdate):
-        return ProjectRead.model_validate(Project.update(id, data))
+        return Project.update(id, data)
 
     def delete(self, id: str):
         Project.delete(id)
@@ -54,19 +56,53 @@ class ItemProxy(Proxy[ItemRead]):
         self.project_id = project_id
 
     def all(self):
-        return [ItemRead.from_task(*result) for result in Item.list(self.project_id)]
+        return Item.list(self.project_id)
 
     def create(self, data: ItemCreate):
-        return ItemRead.from_task(*Item.create(data, self.project_id))
+        return Item.create(data, self.project_id)
 
     def update(self, id: str, data: ItemUpdate):
-        return ItemRead.from_task(*Item.update(self.project_id, id, data))
+        return Item.update(self.project_id, id, data)
 
     def delete(self, id: str):
         Item.delete(self.project_id, id)
 
     def move(self, id: str, up_or_down: Literal["up"] | Literal["down"]):
-        return ItemRead.from_task(*Item.move(self.project_id, id, up_or_down))
+        return Item.move(self.project_id, id, up_or_down)
 
     def toggle(self, id: str):
-        return ItemRead.from_task(*Item.check_or_uncheck(self.project_id, id))
+        return Item.check_or_uncheck(self.project_id, id)
+
+
+class BinProxy(Proxy[BinRead]):
+    def __init__(self, board_id: str):
+        self.board_id = board_id
+
+    def all(self):
+        return Bin.list(self.board_id)
+
+    def create(self, data: BinCreate):
+        return Bin.create(data, self.board_id)
+
+    def update(self, id: str, data: BinUpdate):
+        return Bin.update(self.board_id, id, data)
+
+    def delete(self, id: str):
+        Bin.delete(self.board_id, id)
+
+
+class CardProxy(Proxy[CardRead]):
+    def __init__(self, board_id: str):
+        self.board_id = board_id
+
+    def all(self):
+        return Card.list(self.board_id)
+
+    def create(self, data: CardCreate):
+        return Card.create(data, self.board_id)
+
+    def update(self, id: str, data: CardUpdate):
+        return Card.update(self.board_id, id, data)
+
+    def delete(self, id: str):
+        Card.delete(self.board_id, id)
