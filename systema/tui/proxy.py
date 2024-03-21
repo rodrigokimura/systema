@@ -90,6 +90,9 @@ class BinProxy(Proxy[BinRead]):
     def delete(self, id: str):
         Bin.delete(self.board_id, id)
 
+    def move(self, id: str, direction: Literal["left"] | Literal["right"]):
+        return Bin.move(self.board_id, id, direction)
+
 
 class CardProxy(Proxy[CardRead]):
     def __init__(self, board_id: str):
@@ -106,3 +109,10 @@ class CardProxy(Proxy[CardRead]):
 
     def delete(self, id: str):
         Card.delete(self.board_id, id)
+
+    def move(
+        self,
+        id: str,
+        direction: Literal["up"] | Literal["down"] | Literal["left"] | Literal["right"],
+    ):
+        return Card.move(self.board_id, id, direction)

@@ -70,7 +70,7 @@ class Item(ItemBase, TaskMixin[ItemRead], table=True):
                 max_item = session.exec(statement).first()
                 max_order = max_item.order if max_item else 0
                 if item.order == max_order:
-                    return item, task
+                    return ItemRead.from_task(item, task)
 
                 item.order += 1
             else:

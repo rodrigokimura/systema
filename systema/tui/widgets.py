@@ -13,6 +13,8 @@ from textual.widgets import Checkbox, Label, Static
 from textual.widgets import ListView as _ListView
 from textual.widgets import Select as _Select
 
+from systema.models.bin import BinRead
+from systema.models.card import CardRead
 from systema.models.item import ItemRead
 from systema.models.project import ProjectRead
 
@@ -155,9 +157,18 @@ class Item(Static):
 
 
 class Bin(Static):
+    class Focused(Message):
+        def __init__(self, bin: Bin) -> None:
+            super().__init__()
+            self.bin = bin
+
+    class Blur(Message):
+        pass
+
     def __init__(
         self,
         renderable: RenderableType = "",
+        bin: BinRead | None = None,
         *,
         expand: bool = False,
         shrink: bool = False,
@@ -178,3 +189,63 @@ class Bin(Static):
             disabled=disabled,
         )
         self.can_focus = True
+        self.bin = bin
+        self.border_title = bin.name + str(bin.order) if bin else "No bin"
+        self.id = f"bin-{bin.id}" if bin else "bin-None"
+
+    def from_dom(self):
+        id = f"bin-{self.bin.id}" if self.bin else "bin-None"
+        return self.app.query(type(self)).filter(f"#{id}").first()
+
+    def watch_has_focus(self, value: bool) -> None:
+        if value is True:
+            self.post_message(self.Focused(self))
+        else:
+            self.post_message(self.Blur())
+        super().watch_has_focus(value)
+
+
+class Card(Static):
+    class Focused(Message):
+        def __init__(self, card: Card) -> None:
+            super().__init__()
+            self.card = card
+
+    class Blur(Message):
+        pass
+
+    def __init__(
+        self,
+        card: CardRead,
+        *,
+        expand: bool = False,
+        shrink: bool = False,
+        markup: bool = True,
+        name: str | None = None,
+        id: str | None = None,
+        classes: str | None = None,
+        disabled: bool = False,
+    ) -> None:
+        super().__init__(
+            card.name,
+            expand=expand,
+            shrink=shrink,
+            markup=markup,
+            name=name,
+            id=id,
+            classes=classes,
+            disabled=disabled,
+        )
+        self.can_focus = True
+        self.card = card
+        self.id = f"card-{card.id}"
+
+    def from_dom(self):
+        return self.app.query(type(self)).filter(f"#card-{self.card.id}").first()
+
+    def watch_has_focus(self, value: bool) -> None:
+        if value is True:
+            self.post_message(self.Focused(self))
+        else:
+            self.post_message(self.Blur())
+        super().watch_has_focus(value)

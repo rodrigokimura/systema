@@ -59,7 +59,7 @@ class Bin(BinBase, IdMixin, table=True):
 
     @classmethod
     def move(
-        cls, project_id: str, id: str, up_or_down: Literal["up"] | Literal["down"]
+        cls, project_id: str, id: str, direction: Literal["right"] | Literal["left"]
     ):
         with Session(engine) as session:
             project = cls._get_board(session, project_id)
@@ -67,12 +67,16 @@ class Bin(BinBase, IdMixin, table=True):
 
             original_order = bin.order
 
-            if up_or_down == "up":
+            if direction == "left":
                 bin.order = max(0, bin.order - 1)
-            elif up_or_down == "down":
-                statement = select(Bin).order_by(col(Bin.order).desc())
-                max_item = session.exec(statement).first()
-                max_order = max_item.order if max_item else 0
+            elif direction == "right":
+                statement = (
+                    select(Bin)
+                    .where(Bin.board_id == project_id)
+                    .order_by(col(Bin.order).desc())
+                )
+                max_bin = session.exec(statement).first()
+                max_order = max_bin.order if max_bin else 0
                 if bin.order == max_order:
                     return bin
 
@@ -194,6 +198,7 @@ class Bin(BinBase, IdMixin, table=True):
 
 
 class BinRead(BinBase):
+    id: str
     board_id: str
     created_at: datetime
 
