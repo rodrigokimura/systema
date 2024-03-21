@@ -101,7 +101,10 @@ class KanbanScreen(ProjectScreen):
                 bin = bin.from_dom()
                 bin.focus()
         elif card := self.highlighted_card:
-            print(card)
+            self.proxy.move(card.card.id, direction)
+            async with self.repopulate():
+                card = card.from_dom()
+                card.focus()
 
     async def _move_in_y(self, direction: Literal["up"] | Literal["down"]):
         if card := self.highlighted_card:

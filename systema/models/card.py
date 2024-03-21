@@ -5,6 +5,8 @@ from typing import Literal
 from sqlmodel import Field, Session, col, select
 
 from systema.base import BaseModel
+from systema.models.bin import Bin
+from systema.models.project import Project
 from systema.models.task import Task, TaskCreate, TaskMixin, TaskRead, TaskUpdate
 from systema.server.db import engine
 
@@ -102,15 +104,22 @@ class Card(CardBase, TaskMixin[CardRead], table=True):
                 statement = (
                     select(Card)
                     .join(Task)
-                    .where(Card.id == Task.id, Task.project_id == project_id)
+                    .where(
+                        Card.bin_id == card.bin_id,
+                        Card.id == Task.id,
+                        Task.project_id == project_id,
+                    )
                     .order_by(col(Card.order).desc())
                 )
                 max_card = session.exec(statement).first()
                 max_order = max_card.order if max_card else 0
-                if card.order == max_order:
+
+                if card.order >= max_order:
                     return CardRead.from_task(card, task)
 
                 card.order += 1
+            elif direction in ("left", "right"):
+                cls._move_x(session, card, project, direction)
             else:
                 raise ValueError()
 
@@ -140,3 +149,47 @@ class Card(CardBase, TaskMixin[CardRead], table=True):
             session.refresh(card)
             session.refresh(task)
             return CardRead.from_task(card, task)
+
+    @classmethod
+    def _move_x(
+        cls,
+        session: Session,
+        card: Card,
+        project: Project,
+        direction: Literal["left"] | Literal["right"],
+    ):
+        current_bin = session.exec(select(Bin).where(Bin.id == card.bin_id)).first()
+
+        if direction == "left":
+            target_order = (current_bin.order - 1) if current_bin else 0
+        elif direction == "right":
+            target_order = (current_bin.order + 1) if current_bin else 0
+        else:
+            raise ValueError
+
+        if target_order == -1:
+            card.bin_id = None
+            card.order = 0
+            return
+
+        target_bin = session.exec(
+            select(Bin).where(
+                Bin.board_id == project.id,
+                Bin.order == target_order,
+            )
+        ).first()
+
+        if target_bin is None:
+            return
+
+        card.bin_id = target_bin.id
+        card.order = 0
+
+        cls._reorder(
+            session,
+            project.id,
+            card.bin_id,
+            card.order,
+            exclude=card.id,
+            shift=True,
+        )

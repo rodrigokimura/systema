@@ -69,7 +69,7 @@ class Item(ItemBase, TaskMixin[ItemRead], table=True):
                 statement = select(Item).order_by(col(Item.order).desc())
                 max_item = session.exec(statement).first()
                 max_order = max_item.order if max_item else 0
-                if item.order == max_order:
+                if item.order >= max_order:
                     return ItemRead.from_task(item, task)
 
                 item.order += 1

@@ -77,7 +77,7 @@ class Bin(BinBase, IdMixin, table=True):
                 )
                 max_bin = session.exec(statement).first()
                 max_order = max_bin.order if max_bin else 0
-                if bin.order == max_order:
+                if bin.order >= max_order:
                     return bin
 
                 bin.order += 1
