@@ -157,14 +157,6 @@ class Item(Static):
 
 
 class Bin(Static):
-    class Focused(Message):
-        def __init__(self, bin: Bin) -> None:
-            super().__init__()
-            self.bin = bin
-
-    class Blur(Message):
-        pass
-
     def __init__(
         self,
         renderable: RenderableType = "",
@@ -197,23 +189,8 @@ class Bin(Static):
         id = f"bin-{self.bin.id}" if self.bin else "bin-None"
         return self.app.query(type(self)).filter(f"#{id}").first()
 
-    def watch_has_focus(self, value: bool) -> None:
-        if value is True:
-            self.post_message(self.Focused(self))
-        else:
-            self.post_message(self.Blur())
-        super().watch_has_focus(value)
-
 
 class Card(Static):
-    class Focused(Message):
-        def __init__(self, card: Card) -> None:
-            super().__init__()
-            self.card = card
-
-    class Blur(Message):
-        pass
-
     def __init__(
         self,
         card: CardRead,
@@ -242,10 +219,3 @@ class Card(Static):
 
     def from_dom(self):
         return self.app.query(type(self)).filter(f"#card-{self.card.id}").first()
-
-    def watch_has_focus(self, value: bool) -> None:
-        if value is True:
-            self.post_message(self.Focused(self))
-        else:
-            self.post_message(self.Blur())
-        super().watch_has_focus(value)

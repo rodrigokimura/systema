@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 from typing import Literal
 
-from textual.app import ComposeResult, on
+from textual.app import ComposeResult, events, on
 from textual.binding import Binding
 from textual.containers import HorizontalScroll
 from textual.reactive import var
@@ -17,12 +17,10 @@ from systema.tui.widgets import Card as CardWidget
 class KanbanScreen(ProjectScreen):
     BINDINGS = [
         Binding("q,escape", "dismiss", "Quit"),
-        Binding("ctrl+down,ctrl+j", "move_down", "Move down", show=True),
-        Binding("ctrl+up,ctrl+k", "move_up", "Move up", show=True),
-        Binding("ctrl+left,ctrl+h", "move_left", "Move left", show=True),
-        Binding("ctrl+right,ctrl+l", "move_right", "Move right", show=True),
-        # Binding("up,k", "focus_up", "Focus up", show=False),
-        # Binding("down,j", "focus_down", "Focus down", show=False),
+        Binding("shift+down,J", "move_down", "Move down", show=True),
+        Binding("shift+up,K", "move_up", "Move up", show=True),
+        Binding("shift+left,H", "move_left", "Move left", show=True, priority=True),
+        Binding("shift+right,L", "move_right", "Move right", show=True),
         Binding("left,h", "focus_left", "Focus left", show=False),
         Binding("right,l", "focus_right", "Focus right", show=False),
         Binding("m", "select_mode", "Select mode", show=True),
@@ -35,22 +33,21 @@ class KanbanScreen(ProjectScreen):
     highlighted_card: var[CardWidget | None] = var(None)
     highlighted_bin: var[BinWidget | None] = var(None)
 
-    @on(CardWidget.Focused)
-    def handle_card_widget_focused(self, message: CardWidget.Focused):
-        self.highlighted_card = message.card
-        self.highlighted_bin = None
+    @on(events.DescendantFocus)
+    def handle_descendant_focus(self, message: events.DescendantFocus):
+        widget = message.widget
+        if isinstance(widget, CardWidget):
+            self.highlighted_card = widget
+        elif isinstance(widget, BinWidget):
+            self.highlighted_bin = widget
 
-    @on(CardWidget.Blur)
-    def handle_card_widget_blur(self, _: CardWidget.Blur):
-        self.highlighted_card = None
-
-    @on(BinWidget.Focused)
-    def handle_bin_widget_focused(self, message: BinWidget.Focused):
-        self.highlighted_bin = message.bin
-
-    @on(BinWidget.Blur)
-    def handle_bin_widget_blur(self, _: BinWidget.Blur):
-        self.highlighted_bin = None
+    @on(events.DescendantBlur)
+    def handle_descendant_blur(self, message: events.DescendantBlur):
+        widget = message.widget
+        if isinstance(widget, CardWidget):
+            self.highlighted_card = None
+        elif isinstance(widget, BinWidget):
+            self.highlighted_bin = None
 
     def _get_focused_card(self):
         return self.query(CardWidget).first()
