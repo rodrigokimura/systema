@@ -190,7 +190,7 @@ class Bin(Static):
         )
         self.can_focus = True
         self.bin = bin
-        self.border_title = bin.name + str(bin.order) if bin else "No bin"
+        self.border_title = bin.name if bin else "No bin"
         self.id = f"bin-{bin.id}" if bin else "bin-None"
 
     def from_dom(self):
