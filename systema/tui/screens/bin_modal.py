@@ -4,11 +4,11 @@ from textual.containers import Grid
 from textual.screen import ModalScreen
 from textual.widgets import Button, Input, Label
 
-from systema.models.item import ItemCreate, ItemRead, ItemUpdate
+from systema.models.bin import BinCreate, BinRead, BinUpdate
 
 
-class ItemModal(ModalScreen[ItemCreate | ItemUpdate]):
-    CSS_PATH = "styles/item-modal.css"
+class BinModal(ModalScreen[BinCreate | BinUpdate]):
+    CSS_PATH = "styles/bin-modal.css"
     BINDINGS = [
         ("enter", "submit", "Submit"),
         ("escape", "cancel", "Cancel"),
@@ -16,40 +16,41 @@ class ItemModal(ModalScreen[ItemCreate | ItemUpdate]):
 
     def __init__(
         self,
-        item: ItemRead | None = None,
+        bin: BinRead | None = None,
         name: str | None = None,
         id: str | None = None,
         classes: str | None = None,
     ) -> None:
-        self.item = item
+        self.bin = bin
         self.form_data = {}
         super().__init__(name, id, classes)
 
     def compose(self) -> ComposeResult:
         yield Grid(
-            Label("Item"),
+            Label("Bin"),
             Input(
                 placeholder="Name",
                 id="name",
                 name="name",
-                value=self.item.name if self.item else "",
+                value=self.bin.name if self.bin else "",
             ),
             Button("Cancel", "default", id="cancel"),
             Button("Submit", "primary", id="submit"),
         )
 
     def action_submit(self):
-        if self.item:
-            changed_data = ItemUpdate(**self.form_data)
-            original_data = ItemUpdate.model_validate(self.item)
+        if self.bin:
+            changed_data = BinUpdate(**self.form_data)
+            original_data = BinUpdate.model_validate(self.bin)
             if changed_data == original_data:
                 self.notify("Nothing to update")
                 self.dismiss()
                 return
             return_value = changed_data
         else:
-            return_value = ItemCreate(
-                name=self.query(Input).filter("#name").only_one().value
+            return_value = BinCreate(
+                name=self.query(Input).filter("#name").only_one().value,
+                order=0,
             )
         self.dismiss(return_value)
         self.clear()

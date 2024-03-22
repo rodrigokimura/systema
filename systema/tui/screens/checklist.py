@@ -9,8 +9,8 @@ from textual.css.query import NoMatches
 from textual.reactive import var
 from textual.widgets import Collapsible, Footer, Header, ListItem
 
-from systema.server.project_manager.models.item import ItemCreate, ItemUpdate
-from systema.server.project_manager.models.task import Status
+from systema.models.item import ItemCreate, ItemUpdate
+from systema.models.task import Status
 from systema.tui.proxy import ItemProxy
 from systema.tui.screens.base import ProjectScreen
 from systema.tui.screens.confirmation import Confirmation
@@ -18,31 +18,31 @@ from systema.tui.screens.item_modal import ItemModal
 from systema.tui.widgets import Item, ListView
 
 
-class ListScreen(ProjectScreen):
+class ChecklistScreen(ProjectScreen):
     BINDINGS = [
         Binding("q,escape", "dismiss", "Quit"),
         Binding("a", "add_item", "Add", show=True),
         Binding("e", "edit_item", "Edit", show=True),
         Binding("d", "delete_item", "Delete", show=True),
-        Binding("ctrl+down,ctrl+j", "move_down", "Move down", show=True),
-        Binding("ctrl+up,ctrl+k", "move_up", "Move up", show=True),
+        Binding("shift+down,J", "move_down", "Move down", show=True),
+        Binding("shift+up,K", "move_up", "Move up", show=True),
         Binding("space,enter", "toggle_item", "Check/Uncheck", show=True),
         Binding("t", "toggle_collapsible", "Show/Hide completed", show=True),
         Binding("m", "select_mode", "Select mode", show=True),
     ]
-    CSS_PATH = "styles/list.css"
+    CSS_PATH = "styles/checklist.css"
 
     current_item: var[Item | None] = var(None)
     proxy: ItemProxy
+    unchecked_items = ListView()
+    checked_items = ListView()
+    collapsible = Collapsible(checked_items, title="Completed items")
 
     def compose(self) -> ComposeResult:
         yield Header()
         with Vertical():
             if self.project:
-                self.unchecked_items = ListView()
-                self.checked_items = ListView()
                 yield self.unchecked_items
-            self.collapsible = Collapsible(self.checked_items, title="Completed items")
             yield self.collapsible
         yield Footer()
 
@@ -145,9 +145,10 @@ class ListScreen(ProjectScreen):
 
     @on(ListView.Highlighted)
     async def handle_listview_highlighted(self, message: ListView.Highlighted):
-        if message.item:
+        if item := message.item:
+            item.scroll_visible()
             try:
-                self.current_item = message.item.query_one(Item)
+                self.current_item = item.query_one(Item)
             except NoMatches:
                 pass
 

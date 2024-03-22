@@ -5,7 +5,7 @@ from textual.containers import Grid
 from textual.screen import ModalScreen
 from textual.widgets import Button, Input, Label
 
-from systema.server.project_manager.models.project import (
+from systema.models.project import (
     ProjectCreate,
     ProjectRead,
     ProjectUpdate,

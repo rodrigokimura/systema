@@ -7,7 +7,7 @@ from textual.message import Message
 from textual.screen import Screen
 from textual.widgets import Footer, Header, ListItem
 
-from systema.server.project_manager.models.project import (
+from systema.models.project import (
     ProjectCreate,
     ProjectRead,
     ProjectUpdate,

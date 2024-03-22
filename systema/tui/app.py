@@ -3,24 +3,25 @@ from textual.app import App, UnknownModeError
 from textual.binding import Binding
 from textual.reactive import var
 
-from systema.server.project_manager.models.project import ProjectRead
-from systema.tui.proxy import ItemProxy
+from systema.models.project import ProjectRead
+from systema.tui.proxy import CardProxy, ItemProxy
 from systema.tui.screens.base import ProjectScreen
+from systema.tui.screens.checklist import ChecklistScreen
 from systema.tui.screens.dashboard import Dashboard
-from systema.tui.screens.list import ListScreen
+from systema.tui.screens.kanban import KanbanScreen
 from systema.tui.screens.mode_modal import Mode, ModeModal
 from systema.tui.screens.project_list import ProjectList
 
 PROJECT_SCREENS: dict[Mode, ProjectScreen] = {
-    Mode.LIST: ListScreen(ItemProxy),
+    Mode.CHECKLIST: ChecklistScreen(ItemProxy),
+    Mode.KANBAN: KanbanScreen(CardProxy),
 }
 
 
 class SystemaTUIApp(App):
     TITLE = "Systema"
     BINDINGS = [
-        Binding("q", "quit", "Quit", show=True),
-        Binding("escape", "quit", "Quit", show=True),
+        Binding("q,escape", "quit", "Quit", show=True),
         Binding("up,k", "focus_previous", "Focus previous", show=False),
         Binding("down,j", "focus_next", "Focus next", show=False),
         Binding("m", "select_mode", "Select mode", show=True),
@@ -50,14 +51,21 @@ class SystemaTUIApp(App):
 
     @work
     async def action_select_mode(self):
-        if self.project:
-            mode = await self.push_screen_wait("mode")
-            try:
-                self.switch_mode(mode)
-            except UnknownModeError:
-                self.notify("Mode not implemented yet", severity="error")
+        if not self.project:
+            return
+
+        mode = await self.push_screen_wait("mode")
+        if mode == self.current_mode:
+            return
+
+        try:
+            screen = PROJECT_SCREENS[mode]
+            await screen.safe_refresh()
+
+            self.switch_mode(mode)
+        except (UnknownModeError, KeyError):
+            self.notify("Mode not implemented yet", severity="error")
 
 
 if __name__ == "__main__":
-    app = SystemaTUIApp()
-    app.run()
+    SystemaTUIApp().run()

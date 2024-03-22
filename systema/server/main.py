@@ -6,6 +6,8 @@ from fastapi import FastAPI
 from systema.__version__ import VERSION
 from systema.server.auth.endpoints import router as auth_router
 from systema.server.db import create_db_and_tables
+from systema.server.project_manager.endpoints.bin import router as bin_router
+from systema.server.project_manager.endpoints.card import router as card_router
 from systema.server.project_manager.endpoints.item import router as item_router
 from systema.server.project_manager.endpoints.project import router as project_router
 
@@ -21,6 +23,8 @@ app = FastAPI(lifespan=lifespan, version=VERSION)
 app.include_router(auth_router)
 app.include_router(project_router)
 app.include_router(item_router)
+app.include_router(bin_router)
+app.include_router(card_router)
 
 
 @app.get("/")

@@ -4,11 +4,11 @@ from textual.containers import Grid
 from textual.screen import ModalScreen
 from textual.widgets import Button, Input, Label
 
-from systema.models.item import ItemCreate, ItemRead, ItemUpdate
+from systema.models.card import CardCreate, CardRead, CardUpdate
 
 
-class ItemModal(ModalScreen[ItemCreate | ItemUpdate]):
-    CSS_PATH = "styles/item-modal.css"
+class CardModal(ModalScreen[CardCreate | CardUpdate]):
+    CSS_PATH = "styles/card-modal.css"
     BINDINGS = [
         ("enter", "submit", "Submit"),
         ("escape", "cancel", "Cancel"),
@@ -16,39 +16,41 @@ class ItemModal(ModalScreen[ItemCreate | ItemUpdate]):
 
     def __init__(
         self,
-        item: ItemRead | None = None,
+        card: CardRead | None = None,
+        bin_id: str | None = None,
         name: str | None = None,
         id: str | None = None,
         classes: str | None = None,
     ) -> None:
-        self.item = item
+        self.card = card
+        self.bin_id = bin_id
         self.form_data = {}
         super().__init__(name, id, classes)
 
     def compose(self) -> ComposeResult:
         yield Grid(
-            Label("Item"),
+            Label("Card"),
             Input(
                 placeholder="Name",
                 id="name",
                 name="name",
-                value=self.item.name if self.item else "",
+                value=self.card.name if self.card else "",
             ),
             Button("Cancel", "default", id="cancel"),
             Button("Submit", "primary", id="submit"),
         )
 
     def action_submit(self):
-        if self.item:
-            changed_data = ItemUpdate(**self.form_data)
-            original_data = ItemUpdate.model_validate(self.item)
+        if self.card:
+            changed_data = CardUpdate(**self.form_data)
+            original_data = CardUpdate.model_validate(self.card)
             if changed_data == original_data:
                 self.notify("Nothing to update")
                 self.dismiss()
                 return
             return_value = changed_data
         else:
-            return_value = ItemCreate(
+            return_value = CardCreate(
                 name=self.query(Input).filter("#name").only_one().value
             )
         self.dismiss(return_value)

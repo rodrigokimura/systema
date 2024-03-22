@@ -1,0 +1,45 @@
+KanbanScreen {
+  align: center middle;
+
+  & > HorizontalScroll {
+    width: 100%;
+    border: round $primary;
+    margin: 1;
+    overflow-y: auto;
+
+    & Bin {
+      border: round $primary;
+      width: auto;
+      min-width: 30;
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    & Bin:focus {
+      border: round $secondary;
+    }
+
+    & Card {
+      border: round $primary;
+      width: 100%;
+      overflow-y: hidden;
+    }
+
+    & Card:focus {
+      border: round $secondary;
+    }
+
+    & Collapsible {
+      padding-left: 0;
+      overflow-y: hidden;
+
+      & > Contents {
+        width: 100%;
+        height: auto;
+        padding: 0;
+        margin: 0;
+        overflow-y: hidden;
+      }
+    }
+  }
+}

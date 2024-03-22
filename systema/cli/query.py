@@ -6,12 +6,12 @@ from rich.table import Table
 from sqlmodel import Session, select
 
 from systema.base import BaseModel
+from systema.models.checklist import Checklist
+from systema.models.item import Item
+from systema.models.project import Project
+from systema.models.task import Task
 from systema.server.auth.models import User
 from systema.server.auth.utils import get_hash
-from systema.server.project_manager.models.item import Item
-from systema.server.project_manager.models.list import List
-from systema.server.project_manager.models.project import Project
-from systema.server.project_manager.models.task import Task
 
 
 def all(model_class: type[BaseModel]):
@@ -112,5 +112,5 @@ add_model_app(app, User)
 add_model_app(app, Project)
 add_model_app(app, Task)
 
-add_model_app(app, List)
+add_model_app(app, Checklist)
 add_model_app(app, Item)

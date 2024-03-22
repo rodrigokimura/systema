@@ -5,8 +5,9 @@ from datetime import datetime
 from sqlmodel import Field, Session, select
 
 from systema.base import BaseModel, IdMixin
+from systema.models.board import Board
+from systema.models.checklist import Checklist
 from systema.server.db import engine
-from systema.server.project_manager.models.list import List
 
 
 class ProjectBase(BaseModel):
@@ -20,7 +21,9 @@ class Project(ProjectBase, IdMixin, table=True):
     def list(cls):
         with Session(engine) as session:
             statement = select(cls)
-            return session.exec(statement).all()
+            return (
+                ProjectRead.model_validate(row) for row in session.exec(statement).all()
+            )
 
     @classmethod
     def get(cls, id: str):
@@ -38,12 +41,17 @@ class Project(ProjectBase, IdMixin, table=True):
             session.commit()
             session.refresh(project)
 
-            list_ = List(id=project.id)
-            session.add(list_)
+            list_ = Checklist(id=project.id)
+            board = Board(id=project.id)
+
+            session.add_all((list_, board))
             session.commit()
 
+            session.refresh(board)
+            board.create_default_bins(session)
+
             session.refresh(project)
-            return project
+            return ProjectRead.model_validate(project)
 
     @classmethod
     def update(cls, id: str, data: ProjectUpdate):
@@ -54,7 +62,7 @@ class Project(ProjectBase, IdMixin, table=True):
                 session.commit()
 
                 session.refresh(db_project)
-                return db_project
+                return ProjectRead.model_validate(db_project)
 
             raise cls.NotFound()
 
@@ -63,17 +71,18 @@ class Project(ProjectBase, IdMixin, table=True):
         with Session(engine) as session:
             if project := session.get(Project, id):
                 session.delete(project)
+                if list_ := session.get(Checklist, id):
+                    session.delete(list_)
+                if board := session.get(Board, id):
+                    session.delete(board)
                 session.commit()
-                if list := session.get(List, id):
-                    session.delete(list)
-                    session.commit()
                 return
 
             raise cls.NotFound()
 
 
 class ProjectCreate(ProjectBase):
-    ...
+    pass
 
 
 class ProjectRead(ProjectBase):
