@@ -22,7 +22,7 @@ from systema.tui.widgets import Card as CardWidget
 
 class KanbanScreen(ProjectScreen):
     BINDINGS = [
-        Binding("q,escape", "dismiss", "Quit"),
+        Binding("q,escape", "dismiss", "Quit", show=True),
         Binding("a", "add", "Add", show=True),
         Binding("e", "edit", "Edit", show=True),
         Binding("d", "delete", "Delete", show=True),
@@ -68,24 +68,24 @@ class KanbanScreen(ProjectScreen):
 
     def compose(self) -> ComposeResult:
         yield Header()
-        self.cont = HorizontalScroll()
-        yield self.cont
+        self.board = HorizontalScroll()
+        yield self.board
         yield Footer()
 
     async def clear(self):
-        for w in self.cont.query(BinWidget):
-            w.remove()
+        for bin in self.board.query(BinWidget):
+            bin.remove()
 
     async def populate(self):
         cards = list(self.proxy.all())
         bin = BinWidget()
-        self.cont.mount(bin)
+        self.board.mount(bin)
         bin.mount_all(CardWidget(c) for c in self.proxy.all() if c.bin_id is None)
 
-        for b in self.bin_proxy.all():
-            bin = BinWidget(bin=b)
-            self.cont.mount(bin)
-            bin.mount_all(CardWidget(c) for c in cards if c.bin_id == b.id)
+        for bin_ in self.bin_proxy.all():
+            bin = BinWidget(bin=bin_)
+            self.board.mount(bin)
+            bin.mount_all(CardWidget(c) for c in cards if c.bin_id == bin_.id)
 
     @asynccontextmanager
     async def repopulate(self):
@@ -190,3 +190,15 @@ class KanbanScreen(ProjectScreen):
                 self.notify("Card deleted")
                 async with self.repopulate():
                     pass
+
+    def dismiss(self, result=None):
+        if (
+            self.highlighted_card
+            and self.highlighted_card.parent
+            and isinstance(self.highlighted_card.parent, BinWidget)
+        ):
+            self.highlighted_card.parent.focus()
+        elif self.highlighted_bin:
+            self.board.focus()
+        else:
+            return super().dismiss(result)

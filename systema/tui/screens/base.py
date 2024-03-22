@@ -56,9 +56,7 @@ class ProjectScreen(Screen[None]):
             pass
 
     def dismiss(self, result=None):
-        print(f"Ignoring result={result}")
-
         try:
-            return super().dismiss(None)
+            return super().dismiss(result)
         except ScreenStackError:
             self.app.switch_mode("main")

@@ -21,8 +21,7 @@ PROJECT_SCREENS: dict[Mode, ProjectScreen] = {
 class SystemaTUIApp(App):
     TITLE = "Systema"
     BINDINGS = [
-        Binding("q", "quit", "Quit", show=True),
-        Binding("escape", "quit", "Quit", show=True),
+        Binding("q,escape", "quit", "Quit", show=True),
         Binding("up,k", "focus_previous", "Focus previous", show=False),
         Binding("down,j", "focus_next", "Focus next", show=False),
         Binding("m", "select_mode", "Select mode", show=True),
@@ -69,5 +68,4 @@ class SystemaTUIApp(App):
 
 
 if __name__ == "__main__":
-    app = SystemaTUIApp()
-    app.run()
+    SystemaTUIApp().run()
