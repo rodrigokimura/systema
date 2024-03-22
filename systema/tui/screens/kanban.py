@@ -1,15 +1,21 @@
 from contextlib import asynccontextmanager
 from typing import Literal
 
+from textual import work
 from textual.app import ComposeResult, events, on
 from textual.binding import Binding
 from textual.containers import HorizontalScroll
 from textual.reactive import var
 from textual.widgets import Footer, Header
 
+from systema.models.bin import BinCreate, BinUpdate
+from systema.models.card import CardCreate, CardUpdate
 from systema.models.project import ProjectRead
 from systema.tui.proxy import BinProxy, CardProxy
 from systema.tui.screens.base import ProjectScreen
+from systema.tui.screens.bin_modal import BinModal
+from systema.tui.screens.card_modal import CardModal
+from systema.tui.screens.confirmation import Confirmation
 from systema.tui.widgets import Bin as BinWidget
 from systema.tui.widgets import Card as CardWidget
 
@@ -17,6 +23,9 @@ from systema.tui.widgets import Card as CardWidget
 class KanbanScreen(ProjectScreen):
     BINDINGS = [
         Binding("q,escape", "dismiss", "Quit"),
+        Binding("a", "add", "Add", show=True),
+        Binding("e", "edit", "Edit", show=True),
+        Binding("d", "delete", "Delete", show=True),
         Binding("shift+down,J", "move_down", "Move down", show=True),
         Binding("shift+up,K", "move_up", "Move up", show=True),
         Binding("shift+left,H", "move_left", "Move left", show=True, priority=True),
@@ -97,14 +106,14 @@ class KanbanScreen(ProjectScreen):
             async with self.repopulate():
                 bin = bin.from_dom()
                 bin.focus()
-        elif card := self.highlighted_card:
+        elif (card := self.highlighted_card) and card.card:
             self.proxy.move(card.card.id, direction)
             async with self.repopulate():
                 card = card.from_dom()
                 card.focus()
 
     async def _move_in_y(self, direction: Literal["up"] | Literal["down"]):
-        if card := self.highlighted_card:
+        if (card := self.highlighted_card) and card.card:
             self.proxy.move(card.card.id, direction)
             async with self.repopulate():
                 card = card.from_dom()
@@ -121,3 +130,63 @@ class KanbanScreen(ProjectScreen):
 
     async def action_move_right(self):
         await self._move_in_x("right")
+
+    @work
+    async def action_add(self):
+        if not self.highlighted_bin and not self.highlighted_card:
+            bin_modal = BinModal()
+            data_for_creation = await self.app.push_screen_wait(bin_modal)
+            if not isinstance(data_for_creation, BinCreate):
+                return
+            created_bin = self.bin_proxy.create(data_for_creation)
+            self.notify(f"Bin created {created_bin.name}")
+            async with self.repopulate():
+                bin = BinWidget.by_id(self.app, created_bin.id)
+                bin.focus()
+        else:
+            bin = self.highlighted_bin
+            if bin and bin.bin:
+                card_modal = CardModal(bin_id=bin.bin.id)
+            else:
+                card_modal = CardModal()
+
+            data_for_creation = await self.app.push_screen_wait(card_modal)
+            if not isinstance(data_for_creation, CardCreate):
+                return
+            created_card = self.proxy.create(data_for_creation)
+            self.notify(f"Card created {created_card.name}")
+            async with self.repopulate():
+                card = CardWidget.by_id(self.app, created_card.id)
+                card.focus()
+
+    @work
+    async def action_edit(self):
+        if (bin := self.highlighted_bin) and bin.bin:
+            data_for_update = await self.app.push_screen_wait(BinModal(bin.bin))
+            if not isinstance(data_for_update, BinUpdate):
+                return
+            updated_item = self.bin_proxy.update(bin.bin.id, data_for_update)
+            self.notify(f"Bin updated {updated_item.name}")
+            bin.bin = updated_item
+        elif (card := self.highlighted_card) and card.card:
+            data_for_update = await self.app.push_screen_wait(CardModal(card.card))
+            if not isinstance(data_for_update, CardUpdate):
+                return
+            updated_item = self.proxy.update(card.card.id, data_for_update)
+            self.notify(f"Card updated {updated_item.name}")
+            card.card = updated_item
+
+    @work
+    async def action_delete(self):
+        if (bin := self.highlighted_bin) and bin.bin:
+            if await self.app.push_screen_wait(Confirmation("Delete bin?")):
+                self.bin_proxy.delete(bin.bin.id)
+                self.notify("Bin deleted")
+                async with self.repopulate():
+                    pass
+        elif (card := self.highlighted_card) and card.card:
+            if await self.app.push_screen_wait(Confirmation("Delete card?")):
+                self.proxy.delete(card.card.id)
+                self.notify("Card deleted")
+                async with self.repopulate():
+                    pass

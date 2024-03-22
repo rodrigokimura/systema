@@ -5,7 +5,7 @@ from datetime import datetime
 import textual.widgets
 from rich.console import RenderableType
 from textual import on
-from textual.app import ComposeResult
+from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.message import Message
 from textual.reactive import reactive, var
@@ -157,6 +157,8 @@ class Item(Static):
 
 
 class Bin(Static):
+    bin: reactive[BinRead | None] = reactive(None)
+
     def __init__(
         self,
         renderable: RenderableType = "",
@@ -182,8 +184,21 @@ class Bin(Static):
         )
         self.can_focus = True
         self.bin = bin
+        self.id = self._get_formatted_id(bin.id) if bin else "bin-None"
+
+    def _get_formatted_id(self, model_id: str):
+        return f"bin-{model_id}"
+
+    def watch_bin(self, bin: BinRead | None):
+        # sanity check
+        if self.id and bin and self.id != self._get_formatted_id(bin.id):
+            raise ValueError("Trying to update widget attached to wrong bin instance")
+
         self.border_title = bin.name if bin else "No bin"
-        self.id = f"bin-{bin.id}" if bin else "bin-None"
+
+    @classmethod
+    def by_id(cls, app: App, id: str):
+        return app.query(cls).filter(f"#bin-{id}").first()
 
     def from_dom(self):
         id = f"bin-{self.bin.id}" if self.bin else "bin-None"
@@ -191,6 +206,8 @@ class Bin(Static):
 
 
 class Card(Static):
+    card: reactive[CardRead | None] = reactive(None)
+
     def __init__(
         self,
         card: CardRead,
@@ -215,7 +232,24 @@ class Card(Static):
         )
         self.can_focus = True
         self.card = card
-        self.id = f"card-{card.id}"
+        self.id = self._get_formatted_id(card.id)
+
+    def _get_formatted_id(self, model_id: str):
+        return f"card-{model_id}"
+
+    def watch_card(self, card: CardRead | None):
+        # sanity check
+        if self.id and card and self.id != self._get_formatted_id(card.id):
+            raise ValueError("Trying to update widget attached to wrong card instance")
+
+        if card is not None:
+            self.update(card.name)
+
+    @classmethod
+    def by_id(cls, app: App, id: str):
+        return app.query(cls).filter(f"#card-{id}").first()
 
     def from_dom(self):
-        return self.app.query(type(self)).filter(f"#card-{self.card.id}").first()
+        if self.card is not None:
+            return self.by_id(self.app, self.card.id)
+        raise ValueError
