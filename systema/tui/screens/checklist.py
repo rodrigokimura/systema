@@ -18,7 +18,7 @@ from systema.tui.screens.item_modal import ItemModal
 from systema.tui.widgets import Item, ListView
 
 
-class ListScreen(ProjectScreen):
+class ChecklistScreen(ProjectScreen):
     BINDINGS = [
         Binding("q,escape", "dismiss", "Quit"),
         Binding("a", "add_item", "Add", show=True),
@@ -30,19 +30,19 @@ class ListScreen(ProjectScreen):
         Binding("t", "toggle_collapsible", "Show/Hide completed", show=True),
         Binding("m", "select_mode", "Select mode", show=True),
     ]
-    CSS_PATH = "styles/list.css"
+    CSS_PATH = "styles/checklist.css"
 
     current_item: var[Item | None] = var(None)
     proxy: ItemProxy
+    unchecked_items = ListView()
+    checked_items = ListView()
+    collapsible = Collapsible(checked_items, title="Completed items")
 
     def compose(self) -> ComposeResult:
         yield Header()
         with Vertical():
             if self.project:
-                self.unchecked_items = ListView()
-                self.checked_items = ListView()
                 yield self.unchecked_items
-            self.collapsible = Collapsible(self.checked_items, title="Completed items")
             yield self.collapsible
         yield Footer()
 

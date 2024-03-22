@@ -6,14 +6,14 @@ from textual.reactive import var
 from systema.models.project import ProjectRead
 from systema.tui.proxy import CardProxy, ItemProxy
 from systema.tui.screens.base import ProjectScreen
-from systema.tui.screens.checklist import ListScreen
+from systema.tui.screens.checklist import ChecklistScreen
 from systema.tui.screens.dashboard import Dashboard
 from systema.tui.screens.kanban import KanbanScreen
 from systema.tui.screens.mode_modal import Mode, ModeModal
 from systema.tui.screens.project_list import ProjectList
 
 PROJECT_SCREENS: dict[Mode, ProjectScreen] = {
-    Mode.CHECKLIST: ListScreen(ItemProxy),
+    Mode.CHECKLIST: ChecklistScreen(ItemProxy),
     Mode.KANBAN: KanbanScreen(CardProxy),
 }
 
@@ -52,12 +52,20 @@ class SystemaTUIApp(App):
 
     @work
     async def action_select_mode(self):
-        if self.project:
-            mode = await self.push_screen_wait("mode")
-            try:
-                self.switch_mode(mode)
-            except UnknownModeError:
-                self.notify("Mode not implemented yet", severity="error")
+        if not self.project:
+            return
+
+        mode = await self.push_screen_wait("mode")
+        if mode == self.current_mode:
+            return
+
+        try:
+            screen = PROJECT_SCREENS[mode]
+            await screen.safe_refresh()
+
+            self.switch_mode(mode)
+        except (UnknownModeError, KeyError):
+            self.notify("Mode not implemented yet", severity="error")
 
 
 if __name__ == "__main__":

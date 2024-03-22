@@ -46,8 +46,14 @@ class ProjectScreen(Screen[None]):
         raise NotImplementedError
 
     async def on_mount(self):
-        await self.clear()
-        await self.populate()
+        await self.safe_refresh()
+
+    async def safe_refresh(self):
+        try:
+            await self.clear()
+            await self.populate()
+        except AttributeError:
+            pass
 
     def dismiss(self, result=None):
         print(f"Ignoring result={result}")

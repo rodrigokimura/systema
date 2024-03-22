@@ -40,4 +40,5 @@ class ModeModal(ModalScreen[Mode]):
         message.stop()
         mode = message.button.id
         if mode:
+            self.post_message(self.Selected(Mode(mode)))
             self.dismiss(Mode(mode))
