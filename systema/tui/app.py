@@ -60,9 +60,9 @@ class SystemaTUIApp(App):
 
         try:
             screen = PROJECT_SCREENS[mode]
-            await screen.safe_refresh()
-
-            self.switch_mode(mode)
+            with self.batch_update():
+                await screen.safe_refresh()
+                await self.switch_mode(mode)
         except (UnknownModeError, KeyError):
             self.notify("Mode not implemented yet", severity="error")
 

@@ -32,8 +32,10 @@ class ChecklistScreen(ProjectScreen):
     ]
     CSS_PATH = "styles/checklist.css"
 
-    current_item: var[Item | None] = var(None)
     proxy: ItemProxy
+
+    current_item: var[Item | None] = var(None)
+
     unchecked_items = ListView()
     checked_items = ListView()
     collapsible = Collapsible(checked_items, title="Completed items")

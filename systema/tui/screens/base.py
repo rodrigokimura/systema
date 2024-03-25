@@ -34,8 +34,7 @@ class ProjectScreen(Screen[None]):
     async def watch_project(self, project: ProjectRead | None):
         if project:
             self.proxy = self.proxy_type(project.id)
-            await self.clear()
-            await self.populate()
+            await self.safe_refresh()
 
     @abstractmethod
     async def populate(self):
@@ -49,11 +48,9 @@ class ProjectScreen(Screen[None]):
         await self.safe_refresh()
 
     async def safe_refresh(self):
-        try:
+        if hasattr(self, "proxy"):
             await self.clear()
             await self.populate()
-        except AttributeError:
-            pass
 
     def dismiss(self, result=None):
         try:
