@@ -74,6 +74,9 @@ class KanbanScreen(ProjectScreen):
         yield Footer()
 
     async def clear(self):
+        self.highlighted_bin = None
+        self.highlighted_card = None
+        self.board.focus()
         for bin in self.board.query(BinWidget):
             bin.remove()
 
