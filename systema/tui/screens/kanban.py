@@ -42,6 +42,8 @@ class KanbanScreen(ProjectScreen):
     highlighted_card: var[CardWidget | None] = var(None)
     highlighted_bin: var[BinWidget | None] = var(None)
 
+    board = HorizontalScroll()
+
     @on(events.DescendantFocus)
     def handle_descendant_focus(self, message: events.DescendantFocus):
         widget = message.widget
@@ -68,7 +70,6 @@ class KanbanScreen(ProjectScreen):
 
     def compose(self) -> ComposeResult:
         yield Header()
-        self.board = HorizontalScroll()
         yield self.board
         yield Footer()
 
