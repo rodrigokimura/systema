@@ -48,11 +48,9 @@ class ProjectScreen(Screen[None]):
         await self.safe_refresh()
 
     async def safe_refresh(self):
-        try:
+        if hasattr(self, "proxy"):
             await self.clear()
             await self.populate()
-        except AttributeError:
-            pass
 
     def dismiss(self, result=None):
         try:
