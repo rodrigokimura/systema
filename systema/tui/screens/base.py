@@ -34,8 +34,7 @@ class ProjectScreen(Screen[None]):
     async def watch_project(self, project: ProjectRead | None):
         if project:
             self.proxy = self.proxy_type(project.id)
-            await self.clear()
-            await self.populate()
+            await self.safe_refresh()
 
     @abstractmethod
     async def populate(self):
