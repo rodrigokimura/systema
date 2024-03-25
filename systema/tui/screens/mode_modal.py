@@ -4,7 +4,6 @@ from textual import on
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Vertical
-from textual.message import Message
 from textual.screen import ModalScreen
 from textual.widgets import Button, Label
 
@@ -24,11 +23,6 @@ class ModeModal(ModalScreen[Mode]):
         Binding("down,j", "focus_next", "Focus next", show=False),
     ]
 
-    class Selected(Message):
-        def __init__(self, mode: Mode) -> None:
-            super().__init__()
-            self.mode = mode
-
     def compose(self) -> ComposeResult:
         with Vertical():
             yield Label("Modes")
@@ -40,5 +34,4 @@ class ModeModal(ModalScreen[Mode]):
         message.stop()
         mode = message.button.id
         if mode:
-            self.post_message(self.Selected(Mode(mode)))
             self.dismiss(Mode(mode))
