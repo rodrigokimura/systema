@@ -1,7 +1,5 @@
-from sqlmodel import Field
-
-from systema.base import BaseModel
+from systema.models.project import SubProjectMixin
 
 
-class Checklist(BaseModel, table=True):
-    id: str = Field(..., foreign_key="project.id", primary_key=True)
+class Checklist(SubProjectMixin, table=True):
+    pass

@@ -8,6 +8,7 @@ from systema.base import BaseModel
 from systema.models.project import Project
 from systema.models.task import (
     Status,
+    SubTaskMixin,
     Task,
     TaskCreate,
     TaskMixin,
@@ -33,9 +34,7 @@ class ItemUpdate(ItemBase, TaskUpdate):
     pass
 
 
-class Item(ItemBase, TaskMixin[ItemRead], table=True):
-    id: str = Field(..., foreign_key="task.id", primary_key=True)
-
+class Item(SubTaskMixin, ItemBase, TaskMixin[ItemRead], table=True):
     @staticmethod
     def get_read_model():
         return ItemRead

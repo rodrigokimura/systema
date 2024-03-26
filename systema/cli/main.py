@@ -2,6 +2,7 @@ import typer
 from rich import print
 
 from systema.__version__ import VERSION
+from systema.cli.migration import create_submodels
 from systema.management import (
     DB_FILENAME,
     DOTENV_FILENAME,
@@ -89,6 +90,9 @@ def setup():
     create_db_and_tables()
     if typer.prompt("Create superuser?", type=bool, default=True):
         prompt_for_superuser()
+
+    if typer.prompt("Run migration routine?", type=bool, default=False):
+        create_submodels()
 
 
 def prompt_for_superuser():

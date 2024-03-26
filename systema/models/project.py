@@ -5,9 +5,11 @@ from datetime import datetime
 from sqlmodel import Field, Session, select
 
 from systema.base import BaseModel, IdMixin
-from systema.models.board import Board
-from systema.models.checklist import Checklist
 from systema.server.db import engine
+
+
+class SubProjectMixin(BaseModel):
+    id: str = Field(..., foreign_key="project.id", primary_key=True)
 
 
 class ProjectBase(BaseModel):
@@ -35,6 +37,9 @@ class Project(ProjectBase, IdMixin, table=True):
 
     @classmethod
     def create(cls, data: ProjectCreate):
+        from systema.models.board import Board
+        from systema.models.checklist import Checklist
+
         project = Project.model_validate(data)
         with Session(engine) as session:
             session.add(project)
@@ -68,6 +73,9 @@ class Project(ProjectBase, IdMixin, table=True):
 
     @classmethod
     def delete(cls, id: str):
+        from systema.models.board import Board
+        from systema.models.checklist import Checklist
+
         with Session(engine) as session:
             if project := session.get(Project, id):
                 session.delete(project)
