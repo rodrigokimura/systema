@@ -3,8 +3,6 @@ KanbanScreen {
 
   & > HorizontalScroll {
     width: 100%;
-    border: round $primary;
-    margin: 1;
     overflow-y: auto;
 
     & Bin {
