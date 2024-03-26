@@ -59,33 +59,24 @@ def setup():
     """Run setup wizard"""
     from systema.management import settings
 
-    if settings.check_dotenv():
-        replace = typer.prompt(
-            f"{DOTENV_FILENAME} found. Replace with new defaults?",
-            default=True,
-            type=bool,
-        )
-        if replace:
-            settings = Settings(_env_file=None)  # type: ignore
-            settings.to_dotenv()
-            print(
-                f"New config file generated at {settings.base_path / DOTENV_FILENAME}"
-            )
-
-    else:
-        print(f"config file generated at {settings.base_path / DOTENV_FILENAME}")
+    replace = typer.prompt(
+        "New defaults?",
+        default=True,
+        type=bool,
+    )
+    if replace:
+        settings = Settings(_env_file=None)  # type: ignore
         settings.to_dotenv()
+        print(f"New config file generated at {settings.base_path / DOTENV_FILENAME}")
 
-    if settings.check_db():
-        replace = typer.prompt(
-            f"{DB_FILENAME} found. Replace with new empty database?",
-            default=True,
-            type=bool,
-        )
-        if replace:
-            db_file = settings.base_path / DB_FILENAME
-            db_file.unlink(missing_ok=True)
-            print(f"{db_file} removed")
+    replace = typer.prompt(
+        "New empty database?",
+        default=True,
+        type=bool,
+    )
+    if replace:
+        db_file = settings.base_path / DB_FILENAME
+        db_file.unlink(missing_ok=True)
 
     create_db_and_tables()
     if typer.prompt("Create superuser?", type=bool, default=True):

@@ -4,7 +4,7 @@ from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal, VerticalScroll
 from textual.screen import Screen
-from textual.widgets import Button, Footer, Input, Label, Switch
+from textual.widgets import Button, Footer, Input, Label, Pretty, Switch
 
 from systema.management import settings
 
@@ -31,6 +31,7 @@ class Config(Screen[None]):
             )
             yield Label("Access Token Expiry (in minutes)")
             yield self.access_token_expiry
+            yield Pretty(settings.model_dump())
 
         yield Footer()
 
