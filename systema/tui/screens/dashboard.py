@@ -17,7 +17,7 @@ class Dashboard(Screen[None]):
         self.buttons_and_actions = {
             Button("Projects"): self.action_projects,
             Button("Users"): None,
-            Button("Config"): None,
+            Button("Config"): self.actions_config,
         }
         yield Header()
         with Vertical():
@@ -27,6 +27,9 @@ class Dashboard(Screen[None]):
 
     def action_projects(self):
         self.app.push_screen("projects")
+
+    def actions_config(self):
+        self.app.switch_mode("config")
 
     @on(Button.Pressed)
     def handle_button_pressed(self, message: Button.Pressed):

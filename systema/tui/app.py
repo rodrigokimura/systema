@@ -7,6 +7,7 @@ from systema.models.project import ProjectRead
 from systema.tui.proxy import CardProxy, ItemProxy
 from systema.tui.screens.base import ProjectScreen
 from systema.tui.screens.checklist import ChecklistScreen
+from systema.tui.screens.config import Config
 from systema.tui.screens.dashboard import Dashboard
 from systema.tui.screens.kanban import KanbanScreen
 from systema.tui.screens.mode_modal import Mode, ModeModal
@@ -24,7 +25,6 @@ class SystemaTUIApp(App):
         Binding("q,escape", "quit", "Quit", show=True),
         Binding("up,k", "focus_previous", "Focus previous", show=False),
         Binding("down,j", "focus_next", "Focus next", show=False),
-        Binding("m", "select_mode", "Select mode", show=True),
     ]
     CSS_PATH = "style.css"
     SCREENS = {
@@ -32,7 +32,11 @@ class SystemaTUIApp(App):
         "mode": ModeModal(),
         **PROJECT_SCREENS,
     }
-    MODES = {"main": Dashboard(), **PROJECT_SCREENS}
+    MODES = {
+        "main": Dashboard(),
+        "config": Config(),
+        **PROJECT_SCREENS,
+    }
     project: var[ProjectRead | None] = var(None)
 
     def on_mount(self):
@@ -45,8 +49,7 @@ class SystemaTUIApp(App):
 
     @on(ProjectList.Selected)
     async def handle_project_selection(self, message: ProjectList.Selected):
-        project = message.project
-        self.project = project
+        self.project = message.project
         await self.run_action("select_mode")
 
     @work

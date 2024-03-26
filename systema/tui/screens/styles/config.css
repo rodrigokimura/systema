@@ -1,0 +1,23 @@
+Config {
+  & > VerticalScroll {
+    border: round $primary;
+    width: 100%;
+    overflow-y: auto;
+
+    & Horizontal {
+      width: 100%;
+
+      & > Input {
+        width: 1fr;
+      }
+
+      & > Switch {
+        width: auto;
+      }
+
+      & > Button {
+        width: auto;
+      }
+    }
+  }
+}

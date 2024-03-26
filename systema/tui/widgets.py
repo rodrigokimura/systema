@@ -91,21 +91,17 @@ class ProjectItem(Static):
     timestamp: var[Timestamp] = var(Timestamp())
 
     def compose(self) -> ComposeResult:
-        yield Label(classes="name")
-        yield Timestamp(classes="created_at")
+        self.label = Label(classes="name")
+        self.timestamp = Timestamp(classes="created_at")
+        yield self.label
+        yield self.timestamp
 
     async def watch_project(self, project: ProjectRead | None):
         if project is None:
             return
         async with self.batch():
-            self.label.remove()
-            self.timestamp.remove()
-
-            self.label = Label(project.name)
-            self.timestamp = Timestamp()
+            self.label.update(project.name)
             self.timestamp.dt = project.created_at
-
-            self.mount_all((self.label, self.timestamp))
 
 
 class Item(Static):
