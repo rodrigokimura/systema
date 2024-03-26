@@ -31,3 +31,4 @@ def create_submodels():
                             f"Instance of {submodel.__name__} not found for id={core_instance.id}"
                         )
                         session.add(submodel(id=core_instance.id))
+                        session.commit()
