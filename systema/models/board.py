@@ -1,11 +1,9 @@
-from sqlmodel import Field, Session
+from sqlmodel import Session
 
-from systema.base import BaseModel
+from systema.models.project import SubProjectMixin
 
 
-class Board(BaseModel, table=True):
-    id: str = Field(..., foreign_key="project.id", primary_key=True)
-
+class Board(SubProjectMixin, table=True):
     def create_default_bins(self, session: Session):
         from systema.models.bin import Bin
 

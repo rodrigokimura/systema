@@ -12,6 +12,10 @@ from systema.models.project import Project
 from systema.server.db import engine
 
 
+class SubTaskMixin(BaseModel):
+    id: str = Field(..., foreign_key="task.id", primary_key=True)
+
+
 class TaskReadMixin(BaseModel):
     @classmethod
     def from_task(cls, obj: Any, task: Task):

@@ -7,7 +7,14 @@ from sqlmodel import Field, Session, col, select
 from systema.base import BaseModel
 from systema.models.bin import Bin
 from systema.models.project import Project
-from systema.models.task import Task, TaskCreate, TaskMixin, TaskRead, TaskUpdate
+from systema.models.task import (
+    SubTaskMixin,
+    Task,
+    TaskCreate,
+    TaskMixin,
+    TaskRead,
+    TaskUpdate,
+)
 from systema.server.db import engine
 
 
@@ -28,9 +35,7 @@ class CardUpdate(CardBase, TaskUpdate):
     pass
 
 
-class Card(CardBase, TaskMixin[CardRead], table=True):
-    id: str = Field(..., foreign_key="task.id", primary_key=True)
-
+class Card(SubTaskMixin, CardBase, TaskMixin[CardRead], table=True):
     @staticmethod
     def get_read_model():
         return CardRead
