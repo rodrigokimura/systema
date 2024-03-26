@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "systema"
-version = "0.0.1a28"
+version = "0.0.1a29"
 description = ""
 authors = ["Rodrigo Eiti Kimura <rodrigoeitikimura@gmail.com>"]
 readme = "README.md"
@@ -22,6 +22,7 @@ uvloop = "^0.19.0"
 websockets = "^12.0"
 httptools = "^0.6.1"
 pyperclip = "^1.8.2"
+platformdirs = "^4.2.0"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -49,7 +50,7 @@ extend-select = ["I"]
 ignore = []
 
 [tool.commitizen]
-version = "0.0.1a28"
+version = "0.0.1a29"
 tag_format = "v$version"
 version_files = [
     "systema/__version__.py",

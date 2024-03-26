@@ -1,13 +1,19 @@
-from pathlib import Path
+import enum
 
 from nanoid import generate
 from nanoid.resources import alphabet, size
-from pydantic import DirectoryPath, Field
+from platformdirs import user_config_path
+from pydantic import AnyHttpUrl, DirectoryPath, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-BASE_DIR = Path(__name__).resolve().parent
+BASE_DIR = user_config_path("systema", ensure_exists=True)
 DB_FILENAME = ".db"
 DOTENV_FILENAME = ".env"
+
+
+class InstanceType(enum.StrEnum):
+    SERVER = "server"
+    CLIENT = "client"
 
 
 class Settings(BaseSettings):
@@ -24,6 +30,9 @@ class Settings(BaseSettings):
     db_address: str = Field(default=f"sqlite:///{BASE_DIR}/{DB_FILENAME}")
     nanoid_alphabet: str = Field(default=alphabet)
     nanoid_size: int = Field(default=size)
+    server_base_url: AnyHttpUrl = Field(default="http://0.0.0.0:8080/")
+    offline_mode: bool = Field(default=False)
+    instance_type: InstanceType = Field(default=InstanceType.SERVER)
 
     def to_dotenv(self, upper_case: bool = True, replace: bool = True):
         content = ""
